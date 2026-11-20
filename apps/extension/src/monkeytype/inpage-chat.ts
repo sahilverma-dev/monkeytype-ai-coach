@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { renderMarkdown } from "@/shared/markdown";
 import {
 	CHAT_PORT_NAME,
 	type ChatPortEvent,
@@ -32,7 +33,18 @@ const CSS = `
 .mtai-panel__body{padding:.7rem;overflow-y:auto;display:flex;flex-direction:column;gap:.55rem;flex:1 1 auto;min-height:7rem}
 .mtai-panel__msg{font-size:.8rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;padding:.5rem .6rem;border-radius:var(--roundness);max-width:92%}
 .mtai-panel__msg--user{align-self:flex-end;background:var(--sub-alt-color)}
-.mtai-panel__msg--assistant{align-self:flex-start;background:none;border-left:2px solid var(--main-color);border-radius:0;padding-left:.6rem}
+.mtai-panel__msg--assistant{align-self:flex-start;background:none;border-left:2px solid var(--main-color);border-radius:0;padding-left:.6rem;white-space:normal}
+.mtai-panel__msg p{margin:0 0 .55em}
+.mtai-panel__msg p:last-child{margin-bottom:0}
+.mtai-panel__msg ul{margin:.2em 0 .55em;padding-left:1.2em;list-style:disc}
+.mtai-panel__msg ol{margin:.2em 0 .55em;padding-left:1.4em;list-style:decimal}
+.mtai-panel__msg li{margin:.1em 0}
+.mtai-panel__msg strong{font-weight:700}
+.mtai-panel__msg a{color:var(--main-color);text-decoration:underline;text-underline-offset:2px}
+.mtai-panel__msg code{padding:.05em .25em;border-radius:calc(var(--roundness) / 2);background:var(--sub-alt-color);font-family:var(--font);font-size:.92em}
+.mtai-panel__msg pre{margin:.35em 0 .6em;padding:.5em .6em;border-radius:var(--roundness);background:var(--sub-alt-color);overflow-x:auto}
+.mtai-panel__msg pre code{padding:0;background:none}
+.mtai-panel__msg blockquote{margin:.3em 0;padding-left:.6em;border-left:2px solid var(--sub-color);color:var(--sub-color)}
 .mtai-panel__msg--pending{color:var(--sub-color)}
 .mtai-panel__msg--error{color:var(--error-color);border-left-color:var(--error-color)}
 .mtai-panel__chips{display:flex;flex-wrap:wrap;gap:.35rem;padding:0 .7rem .4rem}
@@ -93,6 +105,7 @@ export function mountInpageChat(): void {
 	let stopButton: HTMLButtonElement | null = null;
 	let previewEl: HTMLElement | null = null;
 	let streamingEl: HTMLElement | null = null;
+	let streamBuffer = "";
 	let isOpen = false;
 	let isBusy = false;
 	let focusBeforeOpen: HTMLElement | null = null;
@@ -118,19 +131,22 @@ export function mountInpageChat(): void {
 	const clearMessages = (): void => {
 		if (body !== null) body.textContent = "";
 		streamingEl = null;
+		streamBuffer = "";
 	};
 
 	const appendMessage = (
 		role: "user" | "assistant",
 		text: string,
 		extraClass?: string,
+		markdown = false,
 	): HTMLElement | null => {
 		if (body === null) return null;
 		const node = element(
 			"div",
 			`mtai-panel__msg mtai-panel__msg--${role}${extraClass === undefined ? "" : ` ${extraClass}`}`,
-			text,
 		);
+		if (markdown) node.innerHTML = renderMarkdown(text);
+		else node.textContent = text;
 		body.append(node);
 		scrollToEnd();
 		return node;
@@ -177,7 +193,12 @@ export function mountInpageChat(): void {
 					}
 				} else {
 					for (const message of event.messages) {
-						appendMessage(message.role, message.content);
+						appendMessage(
+							message.role,
+							message.content,
+							undefined,
+							message.role === "assistant",
+						);
 					}
 					setStatus(null);
 				}
@@ -196,7 +217,9 @@ export function mountInpageChat(): void {
 				return;
 			}
 			case "done": {
+				if (streamingEl !== null) streamingEl.innerHTML = renderMarkdown(streamBuffer);
 				streamingEl = null;
+				streamBuffer = "";
 				setBusy(false);
 				scrollToEnd();
 				return;
@@ -260,6 +283,7 @@ export function mountInpageChat(): void {
 		setStatus(null);
 		setBusy(true);
 		streamingEl = null;
+		streamBuffer = "";
 		connection.postMessage({ type: "send", text } satisfies ChatPortRequest);
 	};
 

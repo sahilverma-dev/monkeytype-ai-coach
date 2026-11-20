@@ -93,19 +93,34 @@ body.mtai-popup {
 	font-variant-numeric: tabular-nums;
 }
 
-/* ---- buttons (Monkeytype behaviour, scoped) ---- */
+/* ---- buttons (Monkeytype's current button component, scoped) ---- */
+/*
+ * Mirrors frontend/src/ts/components/common/Button.tsx: the same themable
+ * variables, the same hover/active behaviour, and the same focus ring.
+ */
+.mtai-root {
+	--themable-button-active: var(--main-color);
+	/* Controls sit on the page background; inside a sub-alt card they invert so
+	   they stay visible instead of blending into the panel. */
+	--control-bg: var(--sub-alt-color);
+}
+
 .mtai-root button,
 .mtai-root .mtai-button {
+	--themable-button-bg: var(--control-bg);
+	--themable-button-text: var(--text-color);
+	--themable-button-hover-bg: var(--text-color);
+	--themable-button-hover-text: var(--bg-color);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.5em;
 	height: min-content;
-	padding: 0.5em 0.9em;
-	border: none;
+	padding: 0.5em;
+	border: 0;
 	border-radius: var(--roundness);
-	background: var(--sub-alt-color);
-	color: var(--text-color);
+	background: var(--themable-button-bg);
+	color: var(--themable-button-text);
 	font-family: inherit;
 	font-size: 1em;
 	line-height: 1.25;
@@ -113,16 +128,17 @@ body.mtai-popup {
 	text-decoration: none;
 	cursor: pointer;
 	appearance: none;
+	user-select: none;
 	transition:
-		background 0.125s,
-		color 0.125s,
-		opacity 0.125s;
+		color 0.125s ease-in-out,
+		background 0.125s ease-in-out,
+		opacity 0.125s ease-in-out;
 }
 
 .mtai-root button:hover,
 .mtai-root .mtai-button:hover {
-	background: var(--text-color);
-	color: var(--bg-color);
+	background: var(--themable-button-hover-bg);
+	color: var(--themable-button-hover-text);
 }
 
 .mtai-root button:active,
@@ -139,43 +155,35 @@ body.mtai-popup {
 		0 0 0 0.2rem var(--text-color);
 }
 
-.mtai-root button:disabled {
+.mtai-root button:disabled,
+.mtai-root .mtai-button[aria-disabled="true"] {
 	opacity: 0.33;
 	pointer-events: none;
 }
 
 .mtai-root .mtai-button--active {
-	background: var(--main-color);
-	color: var(--bg-color);
-}
-
-.mtai-root .mtai-button--active:hover {
-	background: var(--text-color);
-	color: var(--bg-color);
+	--themable-button-bg: var(--main-color);
+	--themable-button-text: var(--bg-color);
+	--themable-button-hover-bg: var(--text-color);
+	--themable-button-hover-text: var(--bg-color);
 }
 
 .mtai-root .mtai-button--danger {
-	background: var(--error-color);
-	color: var(--bg-color);
-}
-
-.mtai-root .mtai-button--danger:hover {
-	background: var(--text-color);
-	color: var(--bg-color);
+	--themable-button-bg: var(--error-color);
+	--themable-button-text: var(--bg-color);
+	--themable-button-hover-bg: var(--text-color);
+	--themable-button-hover-text: var(--bg-color);
 }
 
 .mtai-root .mtai-button--ghost {
-	background: none;
-	color: var(--sub-color);
-}
-
-.mtai-root .mtai-button--ghost:hover {
-	background: none;
-	color: var(--text-color);
+	--themable-button-bg: transparent;
+	--themable-button-text: var(--sub-color);
+	--themable-button-hover-bg: transparent;
+	--themable-button-hover-text: var(--text-color);
 }
 
 .mtai-root .mtai-button--ghost:active {
-	background: none;
+	background: transparent;
 	color: var(--sub-color);
 }
 
@@ -186,7 +194,7 @@ body.mtai-popup {
 	outline: none;
 	border: none;
 	border-radius: var(--roundness);
-	background: var(--sub-alt-color);
+	background: var(--control-bg);
 	color: var(--text-color);
 	padding: 0.5em 0.7em;
 	font-family: var(--font);
@@ -259,19 +267,15 @@ body.mtai-popup {
 }
 
 .mtai-tabs button {
-	background: none;
+	--themable-button-bg: transparent;
+	--themable-button-text: var(--sub-color);
+	--themable-button-hover-bg: transparent;
+	--themable-button-hover-text: var(--text-color);
 	padding: 0.4em 0.7em;
-	color: var(--sub-color);
-}
-
-.mtai-tabs button:hover {
-	background: none;
-	color: var(--text-color);
 }
 
 .mtai-tabs button[aria-selected="true"] {
-	background: none;
-	color: var(--main-color);
+	--themable-button-text: var(--main-color);
 }
 
 .mtai-rule {
@@ -307,6 +311,10 @@ body.mtai-popup {
 	background: var(--sub-alt-color);
 	border-radius: var(--roundness);
 	padding: 1rem 1.15rem;
+}
+
+.mtai-root .mtai-card {
+	--control-bg: var(--bg-color);
 }
 
 .mtai-card--plain {
@@ -818,4 +826,105 @@ body.mtai-popup {
 	color: var(--text-color);
 	font-size: 0.78rem;
 	line-height: 1.55;
+}
+
+/* ---- rendered markdown in chat ---- */
+.mtai-md {
+	font-size: 0.9rem;
+	line-height: 1.6;
+	overflow-wrap: anywhere;
+	white-space: normal;
+}
+
+.mtai-md > :first-child {
+	margin-top: 0;
+}
+
+.mtai-md > :last-child {
+	margin-bottom: 0;
+}
+
+.mtai-md p {
+	margin: 0 0 0.6em;
+}
+
+.mtai-md ul,
+.mtai-md ol {
+	margin: 0.2em 0 0.6em;
+	padding-left: 1.3em;
+}
+
+.mtai-md li {
+	margin: 0.15em 0;
+}
+
+.mtai-md strong {
+	font-weight: 700;
+}
+
+.mtai-md a {
+	color: var(--main-color);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.mtai-md code {
+	padding: 0.1em 0.3em;
+	border-radius: calc(var(--roundness) / 2);
+	background: var(--sub-alt-color);
+	font-family: var(--font);
+	font-size: 0.9em;
+}
+
+.mtai-md pre {
+	margin: 0.4em 0 0.7em;
+	padding: 0.6em 0.7em;
+	border-radius: var(--roundness);
+	background: var(--sub-alt-color);
+	overflow-x: auto;
+}
+
+.mtai-md pre code {
+	padding: 0;
+	background: none;
+}
+
+.mtai-md blockquote {
+	margin: 0.4em 0;
+	padding-left: 0.7em;
+	border-left: 2px solid var(--sub-color);
+	color: var(--sub-color);
+}
+
+.mtai-md h1,
+.mtai-md h2,
+.mtai-md h3,
+.mtai-md h4 {
+	margin: 0.7em 0 0.3em;
+	font-size: 1em;
+	font-weight: 700;
+	color: var(--main-color);
+}
+
+.mtai-md hr {
+	margin: 0.9em 0;
+	border: 0;
+	border-top: 1px solid color-mix(in srgb, var(--sub-color) 30%, transparent);
+}
+
+.mtai-md table {
+	margin: 0.4em 0 0.7em;
+	border-collapse: collapse;
+	font-size: 0.85em;
+}
+
+.mtai-md th,
+.mtai-md td {
+	padding: 0.25em 0.45em;
+	border: 1px solid color-mix(in srgb, var(--sub-color) 30%, transparent);
+}
+
+.mtai-md th {
+	font-weight: 400;
+	color: var(--sub-color);
 }

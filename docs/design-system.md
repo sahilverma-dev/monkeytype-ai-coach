@@ -40,28 +40,33 @@ on the site.
 
 ## Components
 
-Behaviour is taken from `buttons.scss` and `inputs.scss`, scoped to `.mtai-root`
-so they can never affect another page:
+Buttons follow Monkeytype's current `Button.tsx`, including its themable
+variables, so a theme can restyle our buttons without touching the extension:
 
-| Element      | Rule                                                                                                                                               |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| button       | `padding: .5em`, `border-radius: var(--roundness)`, `background: var(--sub-alt-color)`, `transition: background .125s, color .125s, opacity .125s` |
-| hover        | `background: var(--text-color); color: var(--bg-color)`                                                                                            |
-| active       | `background: var(--main-color); color: var(--bg-color)`                                                                                            |
-| danger       | `background: var(--error-color); color: var(--bg-color)`                                                                                           |
-| disabled     | `opacity: .33`, no pointer events                                                                                                                  |
-| focus        | `box-shadow: 0 0 0 .1rem var(--bg-color), 0 0 0 .2rem var(--text-color)`                                                                           |
-| input/select | `background: var(--sub-alt-color)`, `.5em` padding, same focus ring                                                                                |
-| placeholder  | `color: var(--sub-color)`                                                                                                                          |
-| selection    | `background: var(--main-color); color: var(--sub-alt-color)`                                                                                       |
+| Element            | Rule                                                                                                                                                                                                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| button             | `padding: .5em`, `gap: .5em`, `border-radius: var(--roundness)`, `background: var(--themable-button-bg)`, `color: var(--themable-button-text)`, `transition: color/background/opacity .125s ease-in-out` |
+| hover              | `background: var(--themable-button-hover-bg); color: var(--themable-button-hover-text)`                                                                                                                  |
+| active             | `background: var(--sub-color); color: var(--bg-color)`                                                                                                                                                   |
+| active/tab variant | `--themable-button-bg: var(--main-color)`, text on `--bg-color`                                                                                                                                          |
+| text variant       | transparent background, `--sub-color` text, text-colour hover                                                                                                                                            |
+| danger             | `--themable-button-bg: var(--error-color)`, text on `--bg-color`                                                                                                                                         |
+| disabled           | `opacity: .33`, no pointer events                                                                                                                                                                        |
+| focus              | `box-shadow: 0 0 0 .1rem var(--bg-color), 0 0 0 .2rem var(--text-color)`                                                                                                                                 |
+| input/select       | `background: var(--sub-alt-color)`, `.5em` padding, same focus ring                                                                                                                                      |
+| placeholder        | `color: var(--sub-color)`                                                                                                                                                                                |
+| selection          | `background: var(--main-color); color: var(--sub-alt-color)`                                                                                                                                             |
 
-Deliberate omissions: no shadows beyond the focus ring, no gradients, no card
-elevation, no oversized radii, no colour outside the theme variables.
+Chat answers are markdown. `marked` parses and DOMPurify sanitises before either
+surface renders it; images, media, iframes and inline styles are stripped so model
+output cannot make a network request. Links open in a new tab with
+`rel="noopener noreferrer"`. Headings, lists, code blocks, quotes and tables use
+the same tokens as the rest of the interface.
 
 ## Where each stylesheet is used
 
 - **Extension pages** (popup, dashboard, options) load `src/styles/base.css`.
-  It defines the tokens, the Tonga-adjacent utility subset, and the scoped
+  It defines the tokens, the Tailwind-adjacent utility subset, and the scoped
   component rules above. Theme values are overwritten at runtime from the last
   theme sampled on a Monkeytype tab (`ThemeSnapshot`), so the popup matches the
   user's actual theme.

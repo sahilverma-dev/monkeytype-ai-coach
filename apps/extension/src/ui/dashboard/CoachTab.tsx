@@ -1,8 +1,8 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { buildCoachData } from "@/ai/context";
-import { ensureProviderPermission } from "@/ai/permissions";
 import { buildPreview, buildSuggestions } from "@/ai/prompt";
 import { streamCoachReply } from "@/ai/service";
+import { renderMarkdown } from "@/shared/markdown";
 import {
 	getConversation,
 	latestConversation,
@@ -16,6 +16,12 @@ import type { CaptureData } from "@/ui/useCaptureData";
 
 function errorText(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
+}
+
+function Markdown(props: { text: string }): ReactNode {
+	const html = useMemo(() => renderMarkdown(props.text), [props.text]);
+	// biome-ignore lint/security/noDangerouslySetInnerHtml: renderMarkdown sanitises with DOMPurify
+	return <div className="mtai-md" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export function CoachTab(props: {
@@ -125,13 +131,6 @@ export function CoachTab(props: {
 		if (ai.model.trim() === "") {
 			setError("Choose a model in settings before asking the coach.");
 			return;
-		}
-
-		// Host access makes requests reliable (no CORS involved). If Chrome declines
-		// the optional permission, still try: many providers allow browser requests.
-		const permitted = await ensureProviderPermission(ai);
-		if (!permitted) {
-			setNotice("Chrome did not grant host access; attempting the request anyway.");
 		}
 
 		const controller = new AbortController();
@@ -296,7 +295,11 @@ export function CoachTab(props: {
 									: "mtai-msg mtai-msg--assistant"
 							}
 						>
-							{message.content}
+							{message.role === "user" ? (
+								message.content
+							) : (
+								<Markdown text={message.content} />
+							)}
 							{message.role === "assistant" ? (
 								<span className="mtai-msg__meta">
 									{message.model ?? ai.model}
@@ -308,7 +311,7 @@ export function CoachTab(props: {
 
 					{busy ? (
 						<div className="mtai-msg mtai-msg--assistant mtai-msg--pending">
-							{streaming === "" ? "thinking…" : streaming}
+							{streaming === "" ? "thinking…" : <Markdown text={streaming} />}
 						</div>
 					) : null}
 				</div>

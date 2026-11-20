@@ -152,21 +152,6 @@ const conversation = {
 			provider: "openai",
 			model: "gpt-4.1-mini",
 		},
-		{
-			id: "m3",
-			role: "user",
-			content: "Is my accuracy improving?",
-			createdAt: now - 40_000,
-		},
-		{
-			id: "m4",
-			role: "assistant",
-			content:
-				"Yes, slowly. Your most recent eight tests average 97.0%, against 95.5% for the eight before them — a gain of 1.5 points. The improvement is real but not yet stable. Hold accuracy above 97% for five consecutive tests before pushing speed again.",
-			createdAt: now - 30_000,
-			provider: "openai",
-			model: "gpt-4.1-mini",
-		},
 	],
 };
 
