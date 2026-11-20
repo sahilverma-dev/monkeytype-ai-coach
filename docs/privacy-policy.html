@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Privacy Policy — Monkeytype AI Companion</title>
+		<style>
+			:root {
+				color-scheme: light;
+				--bg: #f6f5f1;
+				--panel: #ffffff;
+				--text: #23252a;
+				--muted: #61646b;
+				--accent: #9a7a05;
+				--border: #e2e0d8;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--text);
+				font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+					sans-serif;
+			}
+			main {
+				max-width: 780px;
+				margin: 0 auto;
+				padding: 48px 24px 80px;
+			}
+			header {
+				margin-bottom: 36px;
+			}
+			.brand {
+				font-size: 13px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--accent);
+				font-weight: 600;
+			}
+			h1 {
+				margin: 8px 0 6px;
+				font-size: 32px;
+				line-height: 1.2;
+			}
+			.effective {
+				color: var(--muted);
+				font-size: 14px;
+			}
+			h2 {
+				margin: 36px 0 10px;
+				font-size: 20px;
+			}
+			h3 {
+				margin: 24px 0 6px;
+				font-size: 16px;
+			}
+			p,
+			li {
+				margin: 0 0 12px;
+			}
+			ul {
+				padding-left: 22px;
+			}
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				padding: 18px 20px;
+				margin: 18px 0;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin: 12px 0 18px;
+				font-size: 14px;
+			}
+			th,
+			td {
+				border: 1px solid var(--border);
+				padding: 8px 10px;
+				text-align: left;
+				vertical-align: top;
+			}
+			th {
+				background: #faf9f5;
+			}
+			a {
+				color: var(--accent);
+			}
+			code {
+				font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+				font-size: 0.92em;
+				background: #f0eee7;
+				padding: 1px 5px;
+				border-radius: 4px;
+			}
+			footer {
+				margin-top: 48px;
+				padding-top: 18px;
+				border-top: 1px solid var(--border);
+				color: var(--muted);
+				font-size: 13px;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<header>
+				<div class="brand">Monkeytype AI Companion</div>
+				<h1>Privacy Policy</h1>
+				<p class="effective">Effective 20 November 2026 · Version 0.1.0</p>
+			</header>
+
+			<p>
+				This policy explains how the <strong>Monkeytype AI Companion</strong> Chrome
+				extension handles data. It covers the extension only, not the Monkeytype website.
+				Monkeytype has its own privacy policy.
+			</p>
+
+			<div class="card">
+				<strong>The short version.</strong> Your typing tests are analysed inside your
+				browser. Settings, your API key and your captured results are stored locally. No
+				data reaches the developer, because the developer runs no servers. The only time
+				anything leaves your browser is when you explicitly ask for AI coaching (sent
+				directly to the provider you configured, with your own key) or when you explicitly
+				import history from Monkeytype's API with your own ApeKey.
+			</div>
+
+			<h2>Who is responsible</h2>
+			<p>
+				The extension is published by Sahil Verma. Contact:
+				<a href="mailto:domainsahil007@gmail.com">domainsahil007@gmail.com</a>. Source code:
+				<a href="https://github.com/sahilverma-dev/monkeytype-ai-coach"
+					>github.com/sahilverma-dev/monkeytype-ai-coach</a
+				>.
+			</p>
+
+			<h2>What is stored on your device</h2>
+			<p>
+				The extension keeps the following in <code>chrome.storage.local</code> and
+				IndexedDB, inside your browser profile:
+			</p>
+			<ul>
+				<li>
+					<strong>Captured test metrics:</strong> WPM, raw WPM, accuracy, consistency,
+					character counts, test mode and duration, timestamps, and derived per-key error
+					counts and typing rhythm.
+				</li>
+				<li>
+					<strong>Conversations</strong> with the AI coach, including your messages and the
+					model's answers.
+				</li>
+				<li>
+					<strong>Settings:</strong> the provider and model you chose, analysis window,
+					theme colours sampled from Monkeytype, and data-sharing switches.
+				</li>
+				<li>
+					<strong>Credentials:</strong> your AI provider API key and, if you use history
+					import, your Monkeytype ApeKey.
+				</li>
+			</ul>
+			<p>
+				The words you type are <strong>not</strong> stored. The extension reads the results
+				screen and the page's in-memory test log to derive the statistics above, and keeps
+				only those statistics.
+			</p>
+
+			<h2>What leaves your browser</h2>
+			<h3>Your AI provider</h3>
+			<p>
+				Only when you send a coaching message or ask for an insight. The request goes
+				directly from your browser to the provider you configured (OpenAI, Anthropic,
+				Google, OpenRouter, or a custom endpoint), authenticated with your own key. It
+				contains a local analysis summary and your conversation. Depending on your settings
+				it may include per-key error rates, confusion pairs, slow key pairs, and a short
+				summary of recent tests. It never includes the tests' text, your Monkeytype account,
+				or browsing data. The exact prompt is shown in the extension's "preview context"
+				dialog before sending, and key-level data can be switched off in settings.
+			</p>
+			<p>
+				The provider's handling of that request is governed by its own privacy policy. The
+				developer of this extension never receives a copy and operates no proxy or server.
+			</p>
+
+			<h3>Monkeytype's API</h3>
+			<p>
+				Only when you start a history import. The extension calls Monkeytype's documented
+				results endpoint with the ApeKey you created, to read your own past results. The
+				request goes to <code>api.monkeytype.com</code>; the developer is not involved.
+			</p>
+
+			<h3>Nothing else</h3>
+			<p>
+				No telemetry, analytics, crash reporting, advertising, tracking pixels or remote
+				code. The extension makes no network request to the developer and no request to any
+				site other than the provider or API above.
+			</p>
+
+			<h2>Permissions and why they exist</h2>
+			<table>
+				<tr>
+					<th>Permission</th>
+					<th>Purpose</th>
+				</tr>
+				<tr>
+					<td><code>storage</code></td>
+					<td>Remember settings, credentials, captured results and conversations.</td>
+				</tr>
+				<tr>
+					<td><code>https://monkeytype.com/*</code></td>
+					<td>
+						The only site the extension runs on: detect completed tests, read the results
+						screen and in-memory test log, show the optional chat launcher, sample theme
+						colours.
+					</td>
+				</tr>
+				<tr>
+					<td>Optional provider origins</td>
+					<td>
+						Requested only when you configure a provider, to send your coaching request to
+						that domain.
+					</td>
+				</tr>
+				<tr>
+					<td><code>https://api.monkeytype.com/*</code></td>
+					<td>Requested only when you start a history import with your ApeKey.</td>
+				</tr>
+			</table>
+			<p>
+				The extension does not request <code>tabs</code>, <code>scripting</code>,
+				<code>webRequest</code>, <code>cookies</code>, <code>history</code>, or access to any
+				other website.
+			</p>
+
+			<h2>What is never collected</h2>
+			<ul>
+				<li>Personally identifiable information such as your name or address.</li>
+				<li>Health, financial or payment information.</li>
+				<li>Personal communications, email or messages outside the extension's own chat.</li>
+				<li>Precise or approximate location.</li>
+				<li>Browsing history, tabs, or content from websites other than Monkeytype.</li>
+			</ul>
+
+			<h2>Retention and deletion</h2>
+			<p>
+				Data stays on your device until you remove it. In the extension's settings you can
+				<b>export</b> captured tests as JSON or <b>clear</b> them; removing a provider key or
+				your ApeKey deletes it immediately. Uninstalling the extension deletes its storage
+				and IndexedDB database along with it.
+			</p>
+
+			<h2>Security</h2>
+			<p>
+				API keys are read only by extension pages and the background service worker; they
+				are never injected into the Monkeytype page. Requests to providers go directly from
+				your browser over HTTPS. Chrome extension storage is not additionally encrypted
+				beyond your operating system's disk encryption, and the settings screen says so
+				rather than implying otherwise. Treat an API key stored in a browser profile the way
+				you would treat one stored in any local application.
+			</p>
+
+			<h2>Children</h2>
+			<p>
+				The extension is not directed at children and does not knowingly collect data from
+				them.
+			</p>
+
+			<h2>Changes</h2>
+			<p>
+				Material changes to this policy will be published at this URL with a new effective
+				date and noted in the extension's release notes.
+			</p>
+
+			<h2>Not affiliated with Monkeytype</h2>
+			<p>
+				Monkeytype AI Companion is an unofficial companion. It is not affiliated with,
+				endorsed by, or operated by Monkeytype. Monkeytype is a separate service with its own
+				terms and privacy policy.
+			</p>
+
+			<footer>
+				Questions about this policy:
+				<a href="mailto:domainsahil007@gmail.com">domainsahil007@gmail.com</a>
+			</footer>
+		</main>
+	</body>
+</html>
