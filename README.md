@@ -10,7 +10,7 @@ own AI model coach you from that data.
 [![TypeScript](https://img.shields.io/badge/typescript-strict-e2b714)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-e2b714)](LICENSE)
 
-![Dashboard overview](docs/screenshots/dashboard-overview.png)
+![Dashboard overview](docs/screenshots/dashboard-hero.png)
 
 <sub>Screenshots use a seeded demo profile. No real account data, and no API calls are made to produce them.</sub>
 

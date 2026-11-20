@@ -290,6 +290,12 @@ try {
 			path: join(outDir, `dashboard-${tab}.png`),
 			fullPage: true,
 		});
+		if (tab === "overview") {
+			await dashboard.screenshot({
+				path: join(outDir, "dashboard-hero.png"),
+				clip: { x: 0, y: 0, width: 1280, height: 714 },
+			});
+		}
 		log("dashboard", tab);
 	}
 
