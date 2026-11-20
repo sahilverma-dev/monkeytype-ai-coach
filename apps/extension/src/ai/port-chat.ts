@@ -5,7 +5,11 @@ import {
 	type ChatPortEvent,
 	type ChatPortRequest,
 } from "@/shared/port-protocol";
-import { getConversation, latestConversation } from "@/storage/conversations";
+import {
+	getConversation,
+	latestConversation,
+	listConversations,
+} from "@/storage/conversations";
 import { getApiKey } from "@/storage/credentials";
 import { getSettings } from "@/storage/settings";
 import { buildPreview, buildSuggestions } from "./prompt";
@@ -34,14 +38,28 @@ export function registerChatPort(): void {
 			}
 		};
 
-		const postState = async (): Promise<void> => {
+		const conversationSummaries = async () =>
+			(await listConversations()).map((conversation) => ({
+				id: conversation.id,
+				title: conversation.title,
+				updatedAt: conversation.updatedAt,
+			}));
+
+		const postState = async (options: { fresh?: boolean } = {}): Promise<void> => {
 			const settings = await getSettings();
 			const apiKey = await getApiKey(settings.ai.provider);
-			const conversation =
-				conversationId === null
-					? await latestConversation()
-					: await getConversation(conversationId);
-			conversationId = conversation?.id ?? null;
+
+			let conversation =
+				conversationId === null ? null : await getConversation(conversationId);
+			if (options.fresh === true) {
+				conversationId = null;
+				conversation = null;
+			} else if (conversation === null && conversationId === null) {
+				// Reopen the most recent thread when the panel connects.
+				conversation = await latestConversation();
+				conversationId = conversation?.id ?? null;
+			}
+
 			const data = await loadCoachData();
 			post({
 				type: "state",
@@ -56,6 +74,7 @@ export function registerChatPort(): void {
 					})) ?? [],
 				suggestions: buildSuggestions(data),
 				snapshot: buildSnapshot(data),
+				conversations: await conversationSummaries(),
 			});
 		};
 
@@ -71,7 +90,11 @@ export function registerChatPort(): void {
 					},
 				);
 				conversationId = reply.conversation.id;
-				post({ type: "done", conversationId });
+				post({
+					type: "done",
+					conversationId,
+					conversations: await conversationSummaries(),
+				});
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
 				if (/cancelled|aborted/i.test(message)) post({ type: "aborted" });
@@ -114,7 +137,10 @@ export function registerChatPort(): void {
 						await handlePreview();
 						return;
 					case "new":
-						conversationId = null;
+						await postState({ fresh: true });
+						return;
+					case "open":
+						conversationId = message.conversationId;
 						await postState();
 						return;
 					case "open-dashboard":

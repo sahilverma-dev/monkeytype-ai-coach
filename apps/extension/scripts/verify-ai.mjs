@@ -358,6 +358,18 @@ try {
 	});
 	console.log("[verify-ai] dashboard chat streamed an answer");
 
+	await dashboard.getByRole("button", { name: "new chat" }).click();
+	await dashboard.waitForFunction(
+		() => document.querySelectorAll("#mtai-panel-coach .mtai-msg--user").length === 0,
+		{ timeout: 10_000 },
+	);
+	await dashboard.selectOption("#mtai-panel-coach select", { index: 1 });
+	await dashboard.waitForFunction(
+		() => document.querySelectorAll("#mtai-panel-coach .mtai-msg--user").length > 0,
+		{ timeout: 10_000 },
+	);
+	console.log("[verify-ai] dashboard new chat and history restore work");
+
 	for (const tab of ["overview", "trends", "keys", "tests", "settings"]) {
 		await dashboard.click(`#mtai-tab-${tab}`);
 		await dashboard.waitForTimeout(300);
@@ -426,7 +438,7 @@ try {
 		panel.style.height = "600px";
 	});
 	await page.waitForTimeout(500);
-	await page.click(".mtai-panel__head button");
+	await page.click(".mtai-panel__close");
 	await page.waitForSelector(".mtai-launcher:not([hidden])");
 	await page.click(".mtai-launcher");
 	await page.waitForSelector(".mtai-panel:not([hidden])");
@@ -452,6 +464,31 @@ try {
 	);
 	await page.screenshot({ path: join(artifacts, "inpage-coach.png") });
 	console.log("[verify-ai] in-page panel streamed an answer");
+
+	const hintText = await page.$eval(
+		".mtai-panel",
+		(element) => element.textContent ?? "",
+	);
+	if (!hintText.includes("enter to send")) throw new Error("composer hint is missing");
+	await page.click(".mtai-panel__menu");
+	await page.waitForSelector(
+		".mtai-panel__history:not([hidden]) .mtai-panel__history-item",
+	);
+	await page.click(".mtai-panel__history-new");
+	await page.waitForFunction(
+		() => document.querySelectorAll(".mtai-panel__msg--user").length === 0,
+		{ timeout: 10_000 },
+	);
+	await page.click(".mtai-panel__menu");
+	await page.waitForSelector(
+		".mtai-panel__history:not([hidden]) .mtai-panel__history-item",
+	);
+	await page.click(".mtai-panel__history-item");
+	await page.waitForFunction(
+		() => document.querySelectorAll(".mtai-panel__msg--user").length > 0,
+		{ timeout: 10_000 },
+	);
+	console.log("[verify-ai] panel new chat and history restore work");
 
 	const pageText = await page.evaluate(() => document.body.textContent ?? "");
 	if (pageText.includes("test-key")) throw new Error("API key leaked into the page DOM");

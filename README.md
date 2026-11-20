@@ -42,6 +42,8 @@ preview.
 - **Visual evidence in chat.** Every coach answer sits under a live snapshot of the
   window: WPM and accuracy sparklines, the key stats and the top problem keys — real
   data, rendered as charts and bars rather than a wall of numbers.
+- **History that behaves.** New chat starts a genuinely empty thread, and the drawer
+  lists previous ones with titles and timestamps; open one to continue it.
 - **Privacy by construction.** The exact prompt is previewable before sending, key
   data and recent-test summaries are optional, credentials never enter a content
   script, and no telemetry is sent anywhere.
@@ -64,7 +66,9 @@ preview.
 
 ![Coach launcher](docs/screenshots/inpage-launcher.png)
 
-The coach opens from the mascot button in the bottom-right corner, stays hidden while a test is running, and the window can be dragged and resized.
+The coach opens from the mascot button in the bottom-right corner, stays hidden while a test is running, and the window can be dragged and resized. Chat history lives in a drawer behind the menu icon:
+
+![Chat history](docs/screenshots/inpage-history.png)
 
 ## Install
 

@@ -78,6 +78,18 @@ const CSS = `
 .mtai-panel__note{font-size:.65rem;color:var(--sub-color);line-height:1.45}
 .mtai-panel__pre{margin:0;padding:.55rem;background:var(--sub-alt-color);border-radius:var(--roundness);font-family:var(--font);font-size:.62rem;line-height:1.5;color:var(--sub-color);white-space:pre-wrap;word-break:break-word;max-height:14rem;overflow:auto}
 .mtai-panel__status{font-size:.7rem;color:var(--sub-color);padding:0 .7rem .5rem}
+.mtai-panel__history{position:absolute;left:0;top:2.7rem;bottom:0;width:min(240px,82%);display:flex;flex-direction:column;background:var(--sub-alt-color);border-right:1px solid color-mix(in srgb,var(--sub-color) 30%,transparent);z-index:3}
+.mtai-panel__history[hidden]{display:none}
+.mtai-panel__history-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.5rem .6rem;border-bottom:1px solid color-mix(in srgb,var(--sub-color) 25%,transparent);font-size:.7rem;color:var(--sub-color)}
+.mtai-panel__history-new{background:none;color:var(--main-color);font-size:.68rem;padding:.15em .3em}
+.mtai-panel__history-new:hover{background:none;color:var(--text-color)}
+.mtai-panel__history-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem;padding:.3rem}
+.mtai-panel__history-item{display:flex;flex-direction:column;align-items:flex-start;gap:.05rem;width:100%;padding:.4rem .5rem;border:none;border-radius:calc(var(--roundness) / 2);background:none;color:var(--text-color);font-size:.72rem;text-align:left;cursor:pointer}
+.mtai-panel__history-item:hover{background:var(--bg-color)}
+.mtai-panel__history-item.is-active{background:var(--bg-color);color:var(--main-color)}
+.mtai-panel__history-item span{font-size:.6rem;color:var(--sub-color);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.mtai-panel__history-empty{padding:.6rem;font-size:.68rem;color:var(--sub-color)}
+.mtai-panel__hint{padding:0 .7rem .1rem;font-size:.62rem;color:var(--sub-color)}
 .mtai-panel__status[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.mtai-launcher{transition:none}}
 `;
@@ -118,6 +130,9 @@ export function mountInpageChat(): void {
 	let panel: HTMLElement | null = null;
 	let body: HTMLElement | null = null;
 	let snapEl: HTMLElement | null = null;
+	let historyEl: HTMLElement | null = null;
+	let historyListEl: HTMLElement | null = null;
+	let historyOpen = false;
 	let chips: HTMLElement | null = null;
 	let modelLabel: HTMLElement | null = null;
 	let statusEl: HTMLElement | null = null;
@@ -241,6 +256,7 @@ export function mountInpageChat(): void {
 		switch (event.type) {
 			case "state": {
 				renderSnapshot(event.snapshot);
+				renderHistory(event.conversations, event.conversationId);
 				if (modelLabel !== null) {
 					modelLabel.textContent = event.configured
 						? `${event.provider} · ${event.model}`
@@ -294,6 +310,7 @@ export function mountInpageChat(): void {
 				if (streamingEl !== null) streamingEl.innerHTML = renderMarkdown(streamBuffer);
 				streamingEl = null;
 				streamBuffer = "";
+				renderHistory(event.conversations, event.conversationId);
 				setBusy(false);
 				scrollToEnd();
 				return;
@@ -433,6 +450,52 @@ export function mountInpageChat(): void {
 		panel.style.top = `${next.top}px`;
 	};
 
+	const relativeTime = (timestamp: number): string => {
+		const seconds = Math.max(0, Math.round((Date.now() - timestamp) / 1000));
+		if (seconds < 60) return "just now";
+		const minutes = Math.round(seconds / 60);
+		if (minutes < 60) return `${minutes}m ago`;
+		const hours = Math.round(minutes / 60);
+		if (hours < 24) return `${hours}h ago`;
+		return `${Math.round(hours / 24)}d ago`;
+	};
+
+	const setHistoryOpen = (open: boolean): void => {
+		historyOpen = open;
+		if (historyEl === null) return;
+		historyEl.hidden = !open;
+		const menu = panel?.querySelector(".mtai-panel__menu");
+		if (menu instanceof HTMLElement) menu.setAttribute("aria-expanded", String(open));
+	};
+
+	const renderHistory = (
+		conversations: { id: string; title: string; updatedAt: number }[],
+		activeId: string | null,
+	): void => {
+		if (historyListEl === null) return;
+		historyListEl.textContent = "";
+		if (conversations.length === 0) {
+			historyListEl.append(
+				element("div", "mtai-panel__history-empty", "No saved conversations yet."),
+			);
+			return;
+		}
+		for (const conversation of conversations) {
+			const item = element("button", "mtai-panel__history-item");
+			item.type = "button";
+			if (conversation.id === activeId) item.classList.add("is-active");
+			item.append(
+				element("span", "", conversation.title),
+				element("span", "", relativeTime(conversation.updatedAt)),
+			);
+			item.addEventListener("click", () => {
+				port?.postMessage({ type: "open", conversationId: conversation.id });
+				setHistoryOpen(false);
+			});
+			historyListEl.append(item);
+		}
+	};
+
 	const buildPanel = (): HTMLElement => {
 		const root = element("div", "mtai-panel");
 		root.setAttribute("role", "dialog");
@@ -440,13 +503,35 @@ export function mountInpageChat(): void {
 		root.hidden = true;
 
 		const head = element("div", "mtai-panel__head");
+		const menu = element("button", "mtai-panel__icon mtai-panel__menu");
+		menu.type = "button";
+		menu.setAttribute("aria-label", "Chat history");
+		menu.setAttribute("aria-expanded", "false");
+		menu.title = "Chat history";
+		menu.innerHTML =
+			'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
+		menu.addEventListener("click", () => setHistoryOpen(!historyOpen));
 		const title = element("span", "mtai-panel__title", "ai coach");
 		modelLabel = element("span", "mtai-panel__model", "");
-		const close = element("button", "mtai-panel__icon", "×");
+		const close = element("button", "mtai-panel__icon mtai-panel__close", "×");
 		close.type = "button";
 		close.setAttribute("aria-label", "Close coach");
 		close.addEventListener("click", () => closePanel());
-		head.append(title, modelLabel, close);
+		head.append(menu, title, modelLabel, close);
+
+		historyEl = element("div", "mtai-panel__history");
+		historyEl.hidden = true;
+		const historyHead = element("div", "mtai-panel__history-head");
+		const historyTitle = element("span", "", "history");
+		const historyNew = element("button", "mtai-panel__history-new", "new chat");
+		historyNew.type = "button";
+		historyNew.addEventListener("click", () => {
+			port?.postMessage({ type: "new" } satisfies ChatPortRequest);
+			setHistoryOpen(false);
+		});
+		historyHead.append(historyTitle, historyNew);
+		historyListEl = element("div", "mtai-panel__history-list");
+		historyEl.append(historyHead, historyListEl);
 		head.style.userSelect = "none";
 		head.style.cursor = "grab";
 		head.addEventListener("pointerdown", (event) => {
@@ -523,13 +608,6 @@ export function mountInpageChat(): void {
 		});
 
 		const actions = element("div", "mtai-panel__actions");
-		const newChat = element("button", "mtai-panel__link", "new chat");
-		newChat.type = "button";
-		newChat.addEventListener("click", () => {
-			previewEl = previewEl ?? null;
-			if (previewEl !== null) previewEl.hidden = true;
-			port?.postMessage({ type: "new" } satisfies ChatPortRequest);
-		});
 		const preview = element("button", "mtai-panel__link", "preview context");
 		preview.type = "button";
 		preview.addEventListener("click", () => {
@@ -546,8 +624,33 @@ export function mountInpageChat(): void {
 			port?.postMessage({ type: "open-dashboard" }),
 		);
 
-		actions.append(newChat, preview, dashboard);
-		root.append(head, snapEl, body, chips, statusEl, previewEl, form, actions);
+		actions.append(preview, dashboard);
+		const hint = element(
+			"div",
+			"mtai-panel__hint",
+			"enter to send · shift + enter for a new line",
+		);
+		root.append(
+			head,
+			historyEl,
+			snapEl,
+			body,
+			chips,
+			statusEl,
+			previewEl,
+			form,
+			hint,
+			actions,
+		);
+
+		// Clicking outside the drawer closes it.
+		root.addEventListener("click", (event) => {
+			if (!historyOpen || historyEl === null) return;
+			const target = event.target;
+			if (!(target instanceof Node)) return;
+			if (historyEl.contains(target) || menu.contains(target)) return;
+			setHistoryOpen(false);
+		});
 
 		// Monkeytype listens for keys at document level; keep its shortcuts out of
 		// the panel while still letting the textarea receive normal input.

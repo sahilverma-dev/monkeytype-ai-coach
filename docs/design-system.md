@@ -73,6 +73,9 @@ the same tokens as the rest of the interface.
 - The panel is a floating window: drag its header to move it, drag the bottom-right
   corner to resize, and the geometry is clamped to the viewport and remembered in
   `localStorage`.
+- A menu button in the panel header opens a history drawer listing previous
+  conversations (title + relative time); the current one is highlighted. The
+  composer states "enter to send · shift + enter for a new line" on both surfaces.
 
 ## Where each stylesheet is used
 

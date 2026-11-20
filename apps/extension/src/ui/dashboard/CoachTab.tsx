@@ -371,6 +371,10 @@ export function CoachTab(props: {
 					)}
 				</div>
 
+				<p className="mtai-note" style={{ margin: 0 }}>
+					enter to send · shift + enter for a new line
+				</p>
+
 				<p className="mtai-note">
 					{formatNumber(coachData.stats.validTests)} tests in context · accuracy{" "}
 					{formatPercent(coachData.stats.acc.average)} · key data on{" "}

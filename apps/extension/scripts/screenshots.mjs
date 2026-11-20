@@ -322,7 +322,12 @@ try {
 	});
 	await page.waitForTimeout(300);
 	await page.screenshot({ path: join(outDir, "inpage-panel.png") });
-	log("in-page panel");
+	await page.click(".mtai-panel__menu");
+	await page.waitForSelector(
+		".mtai-panel__history:not([hidden]) .mtai-panel__history-item",
+	);
+	await page.screenshot({ path: join(outDir, "inpage-history.png") });
+	log("in-page panel and history");
 
 	await page.waitForTimeout(2_000);
 	const popup = await context.newPage();

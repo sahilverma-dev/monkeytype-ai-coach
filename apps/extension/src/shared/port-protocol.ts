@@ -4,11 +4,18 @@ export type ChatPortRequest =
 	| { type: "abort" }
 	| { type: "preview" }
 	| { type: "new" }
+	| { type: "open"; conversationId: string }
 	| { type: "open-dashboard" };
 
 export interface PortMessage {
 	role: "user" | "assistant";
 	content: string;
+}
+
+export interface ConversationSummary {
+	id: string;
+	title: string;
+	updatedAt: number;
 }
 
 import type { CoachSnapshot } from "@/ai/snapshot";
@@ -23,9 +30,10 @@ export type ChatPortEvent =
 			messages: PortMessage[];
 			suggestions: string[];
 			snapshot: CoachSnapshot;
+			conversations: ConversationSummary[];
 	  }
 	| { type: "chunk"; text: string }
-	| { type: "done"; conversationId: string }
+	| { type: "done"; conversationId: string; conversations: ConversationSummary[] }
 	| { type: "error"; message: string }
 	| { type: "aborted" }
 	| { type: "preview"; system: string; tokens: number; provider: string; model: string };
