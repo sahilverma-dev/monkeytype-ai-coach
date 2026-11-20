@@ -150,6 +150,56 @@ export function SettingsTab(props: { data: CaptureData }): ReactNode {
 				</div>
 			</Panel>
 
+			<Panel title="about & credits">
+				<div className="mtai-stack">
+					<p className="mtai-note">
+						Monkeytype AI Companion v{browser.runtime.getManifest().version} — an
+						unofficial companion for{" "}
+						<a href="https://monkeytype.com" target="_blank" rel="noopener noreferrer">
+							Monkeytype
+						</a>
+						, the typing test created by Miodec. Not affiliated with or endorsed by
+						Monkeytype.
+					</p>
+					<p className="mtai-note">
+						Design tokens and component behaviour are mirrored from Monkeytype (GPL-3.0),
+						and the in-page panel uses Monkeytype's own styles at runtime. The icon is
+						derived from its mascot; see the third-party notices. Thank you to Miodec and
+						the Monkeytype contributors for the site this extension is built around.
+					</p>
+					<p className="mtai-note">
+						Built with the Vercel AI SDK, WXT, React, marked and DOMPurify, plus the
+						open-source tools listed in the repository.
+					</p>
+					<div className="mtai-row-tight">
+						<a
+							className="mtai-button mtai-button--ghost"
+							href="https://monkeytype.com"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							monkeytype.com
+						</a>
+						<a
+							className="mtai-button mtai-button--ghost"
+							href="https://github.com/monkeytypegame/monkeytype"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							monkeytype source
+						</a>
+						<a
+							className="mtai-button mtai-button--ghost"
+							href="https://ai-sdk.dev"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							vercel ai sdk
+						</a>
+					</div>
+				</div>
+			</Panel>
+
 			<Panel title="privacy">
 				<ul
 					className="mtai-note"

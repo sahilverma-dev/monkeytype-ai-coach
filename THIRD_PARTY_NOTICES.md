@@ -12,8 +12,8 @@ https://www.apache.org/licenses/LICENSE-2.0
 
 ## Monkeytype
 
-Monkeytype (https://monkeytype.com, https://github.com/monkeytypegame/monkeytype) is
-licensed under GPL-3.0. This project is an independent, unofficial companion:
+Monkeytype (https://monkeytype.com, https://github.com/monkeytypegame/monkeytype), created
+by Miodec (Jack), is licensed under GPL-3.0. This project is an independent, unofficial companion:
 
 - it contains **no Monkeytype source code or stylesheet text**;
 - it mirrors Monkeytype's design tokens (CSS variable names and colour values) and

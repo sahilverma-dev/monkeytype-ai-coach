@@ -12,7 +12,7 @@ own AI model coach you from that data.
 
 ![Dashboard overview](docs/screenshots/dashboard-hero.png)
 
-<sub>Screenshots use a seeded demo profile. No real account data, and no API calls are made to produce them.</sub>
+<sub>Screenshots are generated headlessly from the built extension (`bun run screenshots`) using a seeded demo profile. No real account data, and no API calls are made to produce them.</sub>
 
 ## Why
 
@@ -55,12 +55,14 @@ preview.
 
 ## Screenshots
 
-|                                                   |                                                     |
-| ------------------------------------------------- | --------------------------------------------------- |
-| ![AI coach](docs/screenshots/dashboard-coach.png) | ![In-page panel](docs/screenshots/inpage-panel.png) |
-| Coach grounded in your own numbers                | The same coach on monkeytype.com                    |
-| ![Trends](docs/screenshots/dashboard-trends.png)  | ![Keys](docs/screenshots/dashboard-keys.png)        |
-| Trends, comparisons and spread                    | Per-key error rates and slow pairs                  |
+|                                                   |                                                      |
+| ------------------------------------------------- | ---------------------------------------------------- |
+| ![AI coach](docs/screenshots/dashboard-coach.png) | ![In-page panel](docs/screenshots/inpage-panel.png)  |
+| Coach grounded in your own numbers                | The same coach on monkeytype.com                     |
+| ![Trends](docs/screenshots/dashboard-trends.png)  | ![Keys](docs/screenshots/dashboard-keys.png)         |
+| Trends, comparisons and spread                    | Per-key error rates and slow pairs                   |
+| ![Tests](docs/screenshots/dashboard-tests.png)    | ![Settings](docs/screenshots/dashboard-settings.png) |
+| Every captured test, with its data fidelity       | Provider, import, privacy and credits                |
 
 ![Popup](docs/screenshots/popup.png)
 
@@ -207,11 +209,30 @@ Issues and pull requests are welcome. Please keep the house rules:
 
 Conventional commits are appreciated.
 
+## Credits
+
+This extension is an unofficial companion for **[Monkeytype](https://monkeytype.com)**, the
+minimalistic typing test created by **Miodec** (Jack). Without Monkeytype there would be
+nothing to analyse:
+
+- Website: [monkeytype.com](https://monkeytype.com)
+- Source: [monkeytypegame/monkeytype](https://github.com/monkeytypegame/monkeytype) — GPL-3.0
+
+The interface deliberately follows Monkeytype's design language: CSS variable names,
+colour values and component behaviour are mirrored from the project, and the in-page
+panel uses Monkeytype's own stylesheet at runtime. No Monkeytype source code is copied
+into this repository. The icon is derived from Monkeytype's mascot; its provenance and
+licensing caveat are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Bundled font: **Roboto Mono** (Apache-2.0). Built with the **Vercel AI SDK**, **WXT**,
+**React**, **Zod**, **marked** and **DOMPurify**; tested with **Vitest** and
+**Playwright**; formatted with **Biome**.
+
+Monkeytype is not affiliated with this project and does not endorse it. Thank you to
+Miodec and every Monkeytype contributor for building the site this extension is built
+around.
+
 ## License
 
-[MIT](LICENSE) © Sahil Verma.
-
-This is an unofficial companion and is not affiliated with or endorsed by Monkeytype.
-Monkeytype itself is GPL-3.0; this project contains no Monkeytype source code. Design
-values and component behaviour are mirrored, and the in-page panel uses the site's own
-loaded CSS at runtime. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) © Sahil Verma. Image and mascot assets are called out separately in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

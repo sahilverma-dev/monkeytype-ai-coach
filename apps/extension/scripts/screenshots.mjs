@@ -268,13 +268,21 @@ try {
 	await dashboard.waitForSelector(".mtai-shell");
 	await dashboard.waitForTimeout(600);
 
-	for (const tab of ["overview", "trends", "keys", "coach"]) {
+	for (const tab of ["overview", "trends", "keys", "coach", "tests", "settings"]) {
 		await dashboard.click(`#mtai-tab-${tab}`);
 		await dashboard.waitForTimeout(350);
-		await dashboard.screenshot({
-			path: join(outDir, `dashboard-${tab}.png`),
-			fullPage: true,
-		});
+		if (tab === "settings") {
+			// The settings page is very tall; keep the part that documents setup.
+			await dashboard.screenshot({
+				path: join(outDir, `dashboard-${tab}.png`),
+				clip: { x: 0, y: 0, width: 1280, height: 1080 },
+			});
+		} else {
+			await dashboard.screenshot({
+				path: join(outDir, `dashboard-${tab}.png`),
+				fullPage: true,
+			});
+		}
 		if (tab === "overview") {
 			await dashboard.screenshot({
 				path: join(outDir, "dashboard-hero.png"),
