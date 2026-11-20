@@ -5,6 +5,7 @@ import { clearTests } from "@/storage/tests-repo";
 import { Panel } from "@/ui/components/Panel";
 import { formatNumber, plural } from "@/ui/format";
 import type { CaptureData } from "@/ui/useCaptureData";
+import { HistoryImport } from "./HistoryImport";
 import { ProviderSettings } from "./ProviderSettings";
 
 function downloadJson(tests: unknown[]): void {
@@ -47,6 +48,8 @@ export function SettingsTab(props: { data: CaptureData }): ReactNode {
 	return (
 		<div className="mtai-stack">
 			<ProviderSettings data={props.data} />
+
+			<HistoryImport data={props.data} />
 
 			<Panel title="analysis">
 				<div className="mtai-stack">

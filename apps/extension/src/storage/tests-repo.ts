@@ -1,6 +1,6 @@
 import { MAX_STORED_TESTS } from "@/shared/constants";
 import type { CapturedTest } from "@/shared/types";
-import { clear, count, get, getAll, put, remove } from "./idb";
+import { clear, count, get, getAll, put, putMany, remove } from "./idb";
 
 const TESTS_STORE = "tests";
 const META_STORE = "meta";
@@ -38,6 +38,15 @@ export async function addTest(test: CapturedTest): Promise<"added" | "duplicate"
 	await bumpDataVersion();
 	await prune();
 	return "added";
+}
+
+/** Bulk insert for history import: one version bump, one prune. */
+export async function addTests(tests: CapturedTest[]): Promise<number> {
+	if (tests.length === 0) return 0;
+	await putMany(TESTS_STORE, tests);
+	await bumpDataVersion();
+	await prune();
+	return tests.length;
 }
 
 async function prune(): Promise<void> {

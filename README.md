@@ -15,7 +15,9 @@ Milestones 1 and 2 are complete and installable:
   data from the page's in-memory test log
 - deterministic local analytics (averages, trends, personal bests, per-key error
   rates, confusion pairs, typing rhythm) with an evidence-based weakness engine
-- Monkeytype-native dashboard (overview, keys, coach, tests, settings) and popup
+- Monkeytype-native dashboard (overview, trends, keys, coach, tests, settings) and popup
+- optional history import through a Monkeytype ApeKey, clearly marked as
+  headline-only data
 - bring-your-own-model coaching through the Vercel AI SDK: OpenAI, Anthropic,
   Gemini, OpenRouter and custom OpenAI-compatible endpoints, streaming, model
   discovery, connection testing and normalised errors
@@ -78,6 +80,7 @@ docs/
   install.md             build and load instructions
   providers.md           provider setup, model discovery, error handling
   privacy.md             what is stored, what is sent, permissions
+  limitations.md         every known limit and why it exists
 ```
 
 ## Commands

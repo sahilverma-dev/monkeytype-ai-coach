@@ -3,6 +3,9 @@ import { defineConfig } from "wxt";
 export default defineConfig({
 	srcDir: "src",
 	modules: ["@wxt-dev/module-react"],
+	zip: {
+		artifactTemplate: "monkeytype-ai-companion-{{version}}-{{browser}}.zip",
+	},
 	manifest: {
 		name: "Monkeytype AI Companion",
 		short_name: "MT AI",

@@ -175,6 +175,10 @@ try {
 
 	// --- seed captured tests + provider settings ---
 	const dashboard = await context.newPage();
+	dashboard.on("pageerror", (error) => console.log("[dashboard error]", error.message));
+	dashboard.on("console", (message) => {
+		if (message.type() === "error") console.log("[dashboard console]", message.text());
+	});
 	await dashboard.goto(`chrome-extension://${extensionId}/dashboard.html`, {
 		waitUntil: "domcontentloaded",
 	});
@@ -301,7 +305,7 @@ try {
 	});
 	console.log("[verify-ai] dashboard chat streamed an answer");
 
-	for (const tab of ["overview", "keys", "tests", "settings"]) {
+	for (const tab of ["overview", "trends", "keys", "tests", "settings"]) {
 		await dashboard.click(`#mtai-tab-${tab}`);
 		await dashboard.waitForTimeout(300);
 		await dashboard.screenshot({
@@ -415,6 +419,103 @@ try {
 	if (dashboardMain.toLowerCase() !== pageMainAfter.toLowerCase()) {
 		throw new Error("dashboard did not adopt the sampled Monkeytype theme");
 	}
+
+	// --- history import against a stubbed Monkeytype API ---
+	await context.route("https://api.monkeytype.com/**", async (route) => {
+		const request = route.request();
+		const headers = {
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Headers": "*",
+			"Access-Control-Allow-Methods": "GET,OPTIONS",
+		};
+		if (request.method() === "OPTIONS") {
+			await route.fulfill({ status: 204, headers, body: "" });
+			return;
+		}
+		await route.fulfill({
+			status: 200,
+			headers: { ...headers, "Content-Type": "application/json" },
+			body: JSON.stringify({
+				message: "ok",
+				data: [
+					{
+						_id: "imported1",
+						timestamp: now - 90 * 86_400_000,
+						wpm: 44.5,
+						rawWpm: 48.2,
+						acc: 93.1,
+						consistency: 71,
+						charStats: [300, 20, 3, 4],
+						mode: "time",
+						mode2: "30",
+						testDuration: 30,
+						language: "english",
+						difficulty: "normal",
+						bailedOut: false,
+					},
+					{
+						_id: "imported2",
+						timestamp: now - 91 * 86_400_000,
+						wpm: 41.2,
+						rawWpm: 45,
+						acc: 91.4,
+						consistency: 66,
+						charStats: [280, 26, 1, 6],
+						mode: "words",
+						mode2: "50",
+						testDuration: 32,
+						language: "english",
+						difficulty: "normal",
+						bailedOut: false,
+					},
+				],
+			}),
+		});
+	});
+
+	console.log("[verify-ai] starting history import check");
+	await dashboard.evaluate(() =>
+		chrome.storage.local.set({ "mtai.apeKey": "test-ape-key" }),
+	);
+	await dashboard.reload({ waitUntil: "domcontentloaded" });
+	console.log("[verify-ai] dashboard reloaded for import");
+	await dashboard.waitForSelector("#mtai-tab-settings");
+	await dashboard.click("#mtai-tab-settings");
+	console.log("[verify-ai] settings tab opened");
+	await dashboard.waitForSelector("text=history import");
+	await dashboard.waitForFunction(
+		() => {
+			const buttons = [...document.querySelectorAll("button")];
+			const importButton = buttons.find((button) =>
+				button.textContent?.includes("import past results"),
+			);
+			return importButton !== undefined && !importButton.disabled;
+		},
+		{ timeout: 10_000 },
+	);
+	await dashboard.getByRole("button", { name: "import past results" }).click();
+	await dashboard.waitForFunction(() => document.body.textContent?.includes("imported"), {
+		timeout: 20_000,
+	});
+	console.log("[verify-ai] import status visible");
+	const imported = await dashboard.evaluate(async () => {
+		const request = indexedDB.open("mtai", 1);
+		const db = await new Promise((resolveDb) => {
+			request.onsuccess = () => resolveDb(request.result);
+		});
+		const tx = db.transaction("tests", "readonly");
+		const all = tx.objectStore("tests").getAll();
+		const tests = await new Promise((resolveTests) => {
+			all.onsuccess = () => resolveTests(all.result);
+		});
+		return tests.filter((test) => test.id.startsWith("api-"));
+	});
+	if (imported.length !== 2)
+		throw new Error(`expected 2 imported tests, saw ${imported.length}`);
+	if (imported.some((test) => test.fidelity !== "summary")) {
+		throw new Error("imported tests must be summary fidelity");
+	}
+	console.log("[verify-ai] history import stored 2 summary-fidelity tests");
 
 	// --- what the provider actually received ---
 	if (requests.length < 2)

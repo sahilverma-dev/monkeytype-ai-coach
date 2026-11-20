@@ -23,8 +23,11 @@ export function LineChart(props: {
 
 	const x = (index: number): number =>
 		values.length > 1 ? PAD_X + index * stepX : WIDTH / 2;
+	const flat = max === min;
 	const y = (value: number): number =>
-		height - padBottom - ((value - min) / span) * (height - padTop - padBottom);
+		flat
+			? height / 2
+			: height - padBottom - ((value - min) / span) * (height - padTop - padBottom);
 
 	const points = values.map((value, index) => [x(index), y(value)] as const);
 	const path = points

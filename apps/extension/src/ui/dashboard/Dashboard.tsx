@@ -13,9 +13,11 @@ import { formatNumber, formatPercent, relativeTime } from "@/ui/format";
 import { useCaptureData } from "@/ui/useCaptureData";
 import { CoachTab } from "./CoachTab";
 import { SettingsTab } from "./SettingsTab";
+import { TrendsTab } from "./TrendsTab";
 
 const TABS = [
 	{ id: "overview", label: "overview" },
+	{ id: "trends", label: "trends" },
 	{ id: "keys", label: "keys" },
 	{ id: "coach", label: "coach" },
 	{ id: "tests", label: "tests" },
@@ -298,6 +300,16 @@ export function Dashboard(): ReactNode {
 								</Panel>
 							</>
 						)}
+					</section>
+
+					<section
+						id="mtai-panel-trends"
+						role="tabpanel"
+						aria-labelledby="mtai-tab-trends"
+						hidden={tab !== "trends"}
+						className="mtai-stack"
+					>
+						<TrendsTab stats={stats} windowed={windowed} />
 					</section>
 
 					<section
