@@ -165,9 +165,9 @@ export function SettingsTab(props: { data: CaptureData }): ReactNode {
 						other sites.
 					</li>
 					<li>
-						No AI provider is connected, so nothing is transmitted anywhere. When coaching
-						is configured, only the analysis summary you can preview before sending is
-						used.
+						{data.settings.ai.model === ""
+							? "No model is configured, so no AI requests are made."
+							: `AI requests go only to ${data.settings.ai.provider}, and only when you send a message or ask for an insight. "preview context" shows the exact data first.`}
 					</li>
 					<li>
 						Data lives in this browser profile. Chrome extension storage is not encrypted

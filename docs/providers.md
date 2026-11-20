@@ -27,10 +27,13 @@ provider does not change prompts, analytics or UI.
 5. Press **test connection**. A successful test shows the provider, model, latency
    and the model's one-word reply.
 
-Loading models or testing asks Chrome for host access to that provider's domain.
-That permission is optional and per-domain; declining it still attempts the
-request, because most providers allow browser CORS. If the request then fails
-with a network error, grant access from settings.
+Host access is optional and per-domain. Use **grant host access** in provider
+settings to request it; chat requests do not trigger a browser prompt. Most
+providers allow browser CORS, so chat often works without it. If a request fails
+with a network error, grant access and retry.
+
+OpenRouter uses its documented default endpoint (`https://openrouter.ai/api/v1`);
+no base URL is needed, and requests carry `X-Title` and `HTTP-Referer` headers.
 
 ## Request shape
 

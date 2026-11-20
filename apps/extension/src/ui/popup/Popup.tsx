@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
-import { ensureProviderPermission } from "@/ai/permissions";
 import { QUICK_INSIGHT_PROMPT } from "@/ai/prompt";
 import { generateQuickInsight, getCachedInsight, type QuickInsight } from "@/ai/service";
 import { computeWindowStats } from "@/analytics/overview";
@@ -34,7 +33,6 @@ export function Popup(): ReactNode {
 		setInsightBusy(true);
 		setInsightError(null);
 		try {
-			await ensureProviderPermission(data.settings.ai);
 			setInsight(await generateQuickInsight(QUICK_INSIGHT_PROMPT));
 		} catch (error) {
 			setInsightError(error instanceof Error ? error.message : String(error));

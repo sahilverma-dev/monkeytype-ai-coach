@@ -75,7 +75,9 @@ export function baseURLFor(config: AIConfig): string | null {
 }
 
 function openAICompatibleOptions(config: AIConfig, apiKey: string) {
-	const baseURL = config.baseURL ?? "";
+	// OpenRouter has a documented default base URL, so `config.baseURL` is null
+	// for it; only the custom provider requires a user-supplied endpoint.
+	const baseURL = baseURLFor(config) ?? "";
 	if (baseURL === "") {
 		throw new AIServiceError(
 			"invalid_request",
@@ -215,7 +217,7 @@ export function toServiceError(error: unknown): AIServiceError {
 	if (/failed to fetch|networkerror|load failed/i.test(message)) {
 		return new AIServiceError(
 			"network",
-			"Could not reach the provider. Check your connection, the endpoint, and whether the provider allows browser requests.",
+			"Could not reach the provider. Check the endpoint and connection; if the provider blocks browser requests, grant host access in settings.",
 			{ cause: error },
 		);
 	}

@@ -309,6 +309,23 @@ export function ProviderSettings(props: { data: CaptureData }): ReactNode {
 				</label>
 
 				<div className="mtai-row-tight">
+					<button
+						type="button"
+						className="mtai-button--ghost"
+						onClick={() => {
+							void ensureProviderPermission(ai).then((granted) => {
+								setStatus({
+									tone: granted ? "ok" : "info",
+									text: granted
+										? `Host access granted for ${meta.label}.`
+										: "Host access not granted. Requests are still attempted through CORS.",
+								});
+							});
+						}}
+						disabled={busy !== null}
+					>
+						grant host access
+					</button>
 					<button type="button" onClick={() => void onTest()} disabled={busy !== null}>
 						{busy === "test" ? "testing…" : "test connection"}
 					</button>

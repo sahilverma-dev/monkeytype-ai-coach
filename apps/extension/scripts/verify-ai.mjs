@@ -146,6 +146,13 @@ const port = server.address().port;
 const baseURL = `http://127.0.0.1:${port}/v1`;
 console.log("[verify-ai] mock provider on", baseURL);
 
+const openRouterRequests = [];
+const corsHeaders = {
+	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Headers": "*",
+	"Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+};
+
 const context = await chromium.launchPersistentContext(profile, {
 	channel: "chromium",
 	headless: true,
@@ -161,6 +168,52 @@ const context = await chromium.launchPersistentContext(profile, {
 let exitCode = 0;
 
 try {
+	await context.route("https://openrouter.ai/**", async (route) => {
+		const request = route.request();
+		if (request.method() === "OPTIONS") {
+			await route.fulfill({ status: 204, headers: corsHeaders, body: "" });
+			return;
+		}
+		const url = request.url();
+		if (url.endsWith("/models")) {
+			await route.fulfill({
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json" },
+				body: JSON.stringify({ data: [{ id: "mock-or-model" }] }),
+			});
+			return;
+		}
+		openRouterRequests.push({
+			url,
+			authorization: request.headers().authorization ?? "",
+			body: request.postDataJSON(),
+		});
+		const payload = ["OpenRouter ", "routed ", "answer."]
+			.map(
+				(word) =>
+					`data: ${JSON.stringify({
+						id: "chatcmpl-or",
+						object: "chat.completion.chunk",
+						created: 0,
+						model: "mock-or-model",
+						choices: [{ index: 0, delta: { content: word }, finish_reason: null }],
+					})}\n\n`,
+			)
+			.join("");
+		const finish = `data: ${JSON.stringify({
+			id: "chatcmpl-or",
+			object: "chat.completion.chunk",
+			created: 0,
+			model: "mock-or-model",
+			choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+			usage: { prompt_tokens: 100, completion_tokens: 10, total_tokens: 110 },
+		})}\n\n`;
+		await route.fulfill({
+			status: 200,
+			headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+			body: `${payload}${finish}data: [DONE]\n\n`,
+		});
+	});
 	let worker = context
 		.serviceWorkers()
 		.find((entry) => entry.url().startsWith("chrome-extension://"));
@@ -516,6 +569,45 @@ try {
 		throw new Error("imported tests must be summary fidelity");
 	}
 	console.log("[verify-ai] history import stored 2 summary-fidelity tests");
+
+	// --- OpenRouter regression: default endpoint, no custom base URL ---
+	await dashboard.evaluate(async () => {
+		const stored = await chrome.storage.local.get("mtai.settings");
+		const settings = stored["mtai.settings"];
+		settings.ai = {
+			...settings.ai,
+			provider: "openrouter",
+			model: "mock-or-model",
+			baseURL: null,
+		};
+		await chrome.storage.local.set({
+			"mtai.settings": settings,
+			"mtai.credentials": { openrouter: "test-or-key" },
+		});
+	});
+	await dashboard.reload({ waitUntil: "domcontentloaded" });
+	await dashboard.waitForSelector("#mtai-tab-coach");
+	await dashboard.click("#mtai-tab-coach");
+	await dashboard.waitForSelector(".mtai-composer textarea");
+	await dashboard.getByRole("button", { name: "new chat" }).click();
+	await dashboard.fill(".mtai-composer textarea", "test the openrouter route");
+	await dashboard.click(".mtai-composer button.mtai-button--active");
+	await dashboard.waitForFunction(
+		() =>
+			[...document.querySelectorAll(".mtai-msg--assistant")].some((node) =>
+				node.textContent?.includes("OpenRouter routed answer"),
+			),
+		{ timeout: 30_000 },
+	);
+	if (openRouterRequests.length === 0) throw new Error("OpenRouter received no request");
+	const openRouterRequest = openRouterRequests.at(-1);
+	if (openRouterRequest.url !== "https://openrouter.ai/api/v1/chat/completions") {
+		throw new Error(`unexpected OpenRouter URL: ${openRouterRequest.url}`);
+	}
+	if (openRouterRequest.authorization !== "Bearer test-or-key") {
+		throw new Error("OpenRouter request did not carry the API key");
+	}
+	console.log("[verify-ai] OpenRouter default endpoint works");
 
 	// --- what the provider actually received ---
 	if (requests.length < 2)
