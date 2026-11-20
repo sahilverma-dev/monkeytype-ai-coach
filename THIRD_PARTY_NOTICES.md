@@ -38,3 +38,16 @@ package's `LICENSE`. Notable ones:
 | Biome                             | MIT        |
 | Vitest                            | MIT        |
 | Playwright (verification only)    | Apache-2.0 |
+
+## Monkeytype mascot (extension icon)
+
+`brand/icon.png`, the generated images in `apps/extension/public/icon/`, and
+`docs/assets/icon-*.png` are derived from Monkeytype's mascot.
+
+- Monkeytype is GPL-3.0 and the mascot is part of that project, so treat these image
+  assets as GPL-3.0. The rest of this repository remains MIT; a distributed build that
+  includes the mascot combines both, which is why this is called out explicitly.
+- Monkeytype's name and mascot are its trademarks. This project is unofficial and not
+  endorsed by Monkeytype.
+- If you fork this project and need an MIT-only distribution, replace
+  `brand/icon.png` and run `bun run icons --trim` to regenerate the sizes.

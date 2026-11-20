@@ -13,7 +13,8 @@
 		"postinstall": "wxt prepare",
 		"verify:live": "node scripts/verify-capture.mjs",
 		"verify:ai": "node scripts/verify-ai.mjs",
-		"screenshots": "node scripts/screenshots.mjs"
+		"screenshots": "node scripts/screenshots.mjs",
+		"icons": "node scripts/icons.mjs"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^4.0.106",
@@ -34,6 +35,7 @@
 		"fake-indexeddb": "^6.2.8",
 		"jsdom": "^31.0.1",
 		"playwright-core": "^1.65.1",
+		"sharp": "^0.35.5",
 		"typescript": "^6.0.3",
 		"vitest": "^5.1.1",
 		"wxt": "^0.21.5"

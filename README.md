@@ -141,17 +141,18 @@ docs/
 
 ## Development
 
-| Command                                    | Purpose                                                 |
-| ------------------------------------------ | ------------------------------------------------------- |
-| `bun run dev`                              | WXT dev build for Chrome                                |
-| `bun run build`                            | production build to `apps/extension/.output/chrome-mv3` |
-| `bun run zip`                              | store-ready zip                                         |
-| `bun run test`                             | Vitest suite                                            |
-| `bun run check-types`                      | `wxt prepare` + `tsc --noEmit`                          |
-| `bun run check`                            | Biome format + lint with fixes                          |
-| `cd apps/extension && bun run verify:live` | headless Chrome, real Monkeytype capture                |
-| `cd apps/extension && bun run verify:ai`   | headless chat and history import against local mocks    |
-| `cd apps/extension && bun run screenshots` | regenerate the images in this README                    |
+| Command                                    | Purpose                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| `bun run dev`                              | WXT dev build for Chrome                                          |
+| `bun run build`                            | production build to `apps/extension/.output/chrome-mv3`           |
+| `bun run zip`                              | store-ready zip                                                   |
+| `bun run test`                             | Vitest suite                                                      |
+| `bun run check-types`                      | `wxt prepare` + `tsc --noEmit`                                    |
+| `bun run check`                            | Biome format + lint with fixes                                    |
+| `cd apps/extension && bun run verify:live` | headless Chrome, real Monkeytype capture                          |
+| `cd apps/extension && bun run verify:ai`   | headless chat and history import against local mocks              |
+| `cd apps/extension && bun run screenshots` | regenerate the images in this README                              |
+| `cd apps/extension && bun run icons`       | regenerate extension icons and store assets from `brand/icon.png` |
 
 `verify:live` finishes an actual test on monkeytype.com headlessly and reads the record
 back from IndexedDB. `verify:ai` starts a local OpenAI-compatible mock and a stubbed

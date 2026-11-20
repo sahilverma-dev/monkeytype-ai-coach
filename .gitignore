@@ -58,3 +58,6 @@ coverage
 .cache
 tmp
 temp
+
+# Original mascot artwork; the derived master is brand/icon.png
+/brand/monkeytype-mascot.png
