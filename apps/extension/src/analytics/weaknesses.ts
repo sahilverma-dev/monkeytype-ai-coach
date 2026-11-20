@@ -20,6 +20,8 @@ export interface Weakness {
 	/** Always contains the numbers behind the claim. */
 	evidence: string;
 	recommendation: string;
+	/** Ranking weight within a severity band, so the biggest cause leads. */
+	impact: number;
 }
 
 const SEVERITY_ORDER: Record<Weakness["severity"], number> = {
@@ -61,6 +63,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `Average accuracy ${percent(acc)} over ${stats.validTests} tests, with ${stats.charTotals.incorrect} incorrect and ${stats.charTotals.missed} missed characters.`,
 			recommendation:
 				"Slow to roughly 90% of your current speed until accuracy holds above 97%, then increase speed again. Correct every misspelling instead of skipping it.",
+			impact: 1_000 + (95 - acc) * 10,
 		});
 	}
 
@@ -74,6 +77,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `Average consistency ${percent(consistency)} across ${stats.validTests} tests.`,
 			recommendation:
 				"Type to a metronome-like rhythm on familiar word lists before pushing speed. Even pacing usually raises net speed before raw speed does.",
+			impact: 400 + (70 - consistency),
 		});
 	}
 
@@ -93,6 +97,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `${stats.charTotals.missed} missed characters (${percent(missedShare)} of typed characters).`,
 			recommendation:
 				"Finish every word before pressing space. Practise in word mode with the same list length rather than timed mode, where skipping is easier to hide.",
+			impact: 800 + missedShare * 10,
 		});
 	}
 
@@ -120,6 +125,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 					? "."
 					: `, most often typed as "${displayChar(topConfusion.typed)}" (${topConfusion.count}x).`),
 			recommendation: `Add words with "${displayChar(entry.char)}" to your practice list and slow down on that key until the error rate drops below 5%.`,
+			impact: 600 + entry.errors,
 		});
 	}
 
@@ -138,6 +144,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			title: `"${displayChar(confusion.expected)}" is often replaced by "${displayChar(confusion.typed)}"`,
 			evidence: `${confusion.count} occurrences in the captured tests.`,
 			recommendation: `Drill "${displayChar(confusion.expected)}" versus "${displayChar(confusion.typed)}" pairs in custom text, 20 reps each.`,
+			impact: 500 + confusion.count,
 		});
 	}
 
@@ -152,6 +159,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			title: `"${slowBigram.pair}" is slow to type`,
 			evidence: `Average gap of ${slowBigram.meanMs}ms between those keys over ${slowBigram.samples} samples.`,
 			recommendation: `Practise common words containing "${slowBigram.pair}" and aim for an even interval between the two keys.`,
+			impact: 300 + (slowBigram.meanMs - 250),
 		});
 	}
 
@@ -169,6 +177,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `${stats.validTests} tests with ${stats.trend.changeOverWindow.toFixed(1)} WPM net change and no clear direction.`,
 			recommendation:
 				"Change one variable for the next 10 tests: a harder word list, longer tests, or strict accuracy. Repeating the same easy configuration tends to flatten progress.",
+			impact: 100,
 		});
 	}
 
@@ -185,6 +194,7 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `Correlation of ${stats.tradeoffCorrelation.toFixed(2)} between WPM and accuracy over ${stats.validTests} tests.`,
 			recommendation:
 				"Pace yourself at a speed where accuracy stays above 97%. Speed built on corrected errors is the more durable path.",
+			impact: 200,
 		});
 	}
 
@@ -197,11 +207,14 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 			evidence: `${stats.validTests} tests captured, but none carried keystroke detail.`,
 			recommendation:
 				"Keep the extension enabled while typing on Monkeytype. Key-level analysis needs the page's in-memory test log.",
+			impact: 10,
 		});
 	}
 
 	return weaknesses.sort(
 		(a, b) =>
-			SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || a.id.localeCompare(b.id),
+			SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] ||
+			b.impact - a.impact ||
+			a.id.localeCompare(b.id),
 	);
 }

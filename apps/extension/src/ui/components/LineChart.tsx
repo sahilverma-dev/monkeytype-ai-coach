@@ -13,8 +13,8 @@ export function LineChart(props: {
 	if (values.length === 0) return null;
 
 	const height = props.height ?? 150;
-	const padTop = 14;
-	const padBottom = 14;
+	const padTop = 22;
+	const padBottom = 26;
 	const format = props.formatValue ?? ((value: number) => value.toFixed(0));
 	const min = Math.min(...values);
 	const max = Math.max(...values);
@@ -70,10 +70,10 @@ export function LineChart(props: {
 							/>
 						))
 					: null}
-				<text className="mtai-chart__label" x={PAD_X} y={padTop - 4}>
+				<text className="mtai-chart__label" x={PAD_X} y={padTop - 9}>
 					{format(max)}
 				</text>
-				<text className="mtai-chart__label" x={PAD_X} y={height - padBottom - 4}>
+				<text className="mtai-chart__label" x={PAD_X} y={height - 9}>
 					{format(min)}
 				</text>
 			</svg>
