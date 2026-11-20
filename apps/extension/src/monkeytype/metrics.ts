@@ -1,6 +1,6 @@
 import type { CapturedMetrics } from "@/shared/types";
 import type { EventLog } from "./event-log";
-import { inputEvents, targetText } from "./event-log";
+import { committedValue, inputEvents, targetText } from "./event-log";
 
 const UNIT_TO_WPM: Record<string, number> = {
 	wpm: 1,
@@ -116,7 +116,7 @@ export function computeMetrics(log: EventLog): CapturedMetrics | null {
 		const data = event.data;
 		if (data.wordIndex === undefined) continue;
 		if (data.inputValue === undefined) continue;
-		lastValueByWord.set(data.wordIndex, data.inputValue);
+		lastValueByWord.set(data.wordIndex, committedValue(data));
 		if (data.inputType !== "insertText") continue;
 		if (data.automatic === true) continue;
 		if (data.commitsWord === true) continue;

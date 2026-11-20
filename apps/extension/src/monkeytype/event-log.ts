@@ -8,8 +8,13 @@ import { z } from "zod";
  * extension actually reads are declared.
  */
 
+/**
+ * The live page's frozen log carries `testMs` (time since test start) and may
+ * omit `ms` entirely; older builds had both. Either is optional so a shape
+ * change degrades instead of discarding the whole log.
+ */
 const eventBase = {
-	ms: z.number().finite(),
+	ms: z.number().finite().optional(),
 	testMs: z.number().finite().optional(),
 };
 
@@ -93,4 +98,24 @@ export function testStartDate(log: EventLog): number | null {
 
 export function inputEvents(log: EventLog): InputTestEvent[] {
 	return log.events.filter((event): event is InputTestEvent => event.type === "input");
+}
+
+/**
+ * A word's content at commit time. Monkeytype logs the commit space inside
+ * `inputValue`, so it must be removed or every word looks one character too long.
+ */
+export function committedValue(data: {
+	inputValue?: string;
+	commitsWord?: boolean;
+}): string {
+	const value = data.inputValue ?? "";
+	if (data.commitsWord === true && (value.endsWith(" ") || value.endsWith("\n"))) {
+		return value.slice(0, -1);
+	}
+	return value;
+}
+
+/** Relative time of an event, whichever clock the page provided. */
+export function eventMs(event: EventLog["events"][number]): number {
+	return event.testMs ?? event.ms ?? 0;
 }

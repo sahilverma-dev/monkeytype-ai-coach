@@ -1,6 +1,12 @@
 import { MAX_PLAUSIBLE_LATENCY_MS } from "@/shared/constants";
 import type { BigramLatency, CharErrorStat, KeyDerivedStats } from "@/shared/types";
-import { type EventLog, inputEvents, targetText } from "./event-log";
+import {
+	committedValue,
+	type EventLog,
+	eventMs,
+	inputEvents,
+	targetText,
+} from "./event-log";
 
 /**
  * Key-level analysis derived from Monkeytype's in-memory event log.
@@ -84,7 +90,7 @@ export function deriveKeyStats(log: EventLog): KeyDerivedStats | null {
 			const value = data.inputValue ?? "";
 
 			if (data.commitsWord === true) {
-				finalizeWord(wordIndex, value);
+				finalizeWord(wordIndex, committedValue(data));
 				lastInsert = null;
 				continue;
 			}
@@ -126,7 +132,7 @@ export function deriveKeyStats(log: EventLog): KeyDerivedStats | null {
 				}
 
 				if (lastInsert !== null) {
-					const gap = event.ms - lastInsert.ms;
+					const gap = eventMs(event) - lastInsert.ms;
 					if (gap > 0 && gap <= MAX_PLAUSIBLE_LATENCY_MS) {
 						const pair = lastInsert.char + expected;
 						const samples = bigramSamples.get(pair);
@@ -137,7 +143,7 @@ export function deriveKeyStats(log: EventLog): KeyDerivedStats | null {
 						}
 					}
 				}
-				lastInsert = { ms: event.ms, char: expected };
+				lastInsert = { ms: eventMs(event), char: expected };
 			} else {
 				lastInsert = null;
 			}
