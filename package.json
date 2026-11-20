@@ -29,5 +29,6 @@
 		"turbo": "^2.11.11",
 		"typescript": "^6.0.3",
 		"varlock": "1.25.0"
-	}
+	},
+	"license": "MIT"
 }

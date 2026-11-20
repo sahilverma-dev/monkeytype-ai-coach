@@ -12,7 +12,8 @@
 		"test:watch": "vitest",
 		"postinstall": "wxt prepare",
 		"verify:live": "node scripts/verify-capture.mjs",
-		"verify:ai": "node scripts/verify-ai.mjs"
+		"verify:ai": "node scripts/verify-ai.mjs",
+		"screenshots": "node scripts/screenshots.mjs"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^4.0.106",
@@ -34,5 +35,6 @@
 		"typescript": "^6.0.3",
 		"vitest": "^5.1.1",
 		"wxt": "^0.21.5"
-	}
+	},
+	"license": "MIT"
 }
