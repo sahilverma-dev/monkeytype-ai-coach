@@ -1,0 +1,3 @@
+{
+	"extends": "@monkey-type-ai-extension/config/tsconfig.base.json"
+}

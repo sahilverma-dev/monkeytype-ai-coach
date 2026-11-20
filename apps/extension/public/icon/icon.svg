@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img">
+  <title>Monkeytype AI Companion</title>
+  <rect width="512" height="512" rx="112" fill="#323437"/>
+  <path d="M256 88c-92 0-166 62-166 140 0 44 24 84 63 110l-15 58c-4 14 11 25 23 17l72-46c7 1 15 1 23 1 92 0 166-62 166-140S348 88 256 88z" fill="#e2b714"/>
+  <circle cx="196" cy="228" r="21" fill="#323437"/>
+  <circle cx="256" cy="228" r="21" fill="#323437"/>
+  <circle cx="316" cy="228" r="21" fill="#323437"/>
+</svg>
