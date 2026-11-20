@@ -62,7 +62,8 @@ preview.
 
 ### From a release
 
-1. Download the latest `monkeytype-ai-companion-*-chrome.zip` from Releases.
+1. Download the latest `monkeytype-ai-companion-*-chrome.zip` from Releases (created
+   automatically when a `v*` tag is pushed).
 2. Unzip it somewhere permanent.
 3. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and
    select the unzipped folder.
@@ -79,8 +80,8 @@ bun run build     # production build
 # or: bun run dev # rebuild on save
 ```
 
-Load `apps/extension/.output/chrome-mv3` as an unpacked extension. Requires Chrome 111+
-and Bun 1.4+.
+Load `apps/extension/.output/chrome-mv3` as an unpacked extension. Chrome 111+ is
+required to run it; building requires Bun 1.4+.
 
 ## Connect a model
 

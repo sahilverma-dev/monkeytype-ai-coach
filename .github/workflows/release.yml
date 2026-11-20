@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Tests
+        run: bun run test
+
+      - name: Package
+        run: bun run zip
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/extension/.output/*.zip
+          generate_release_notes: true
