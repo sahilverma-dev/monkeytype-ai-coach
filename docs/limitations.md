@@ -18,6 +18,9 @@ gap with invented numbers.
 - Results captured live and the same result fetched from the API cannot share an
   id (the API row is created after the test), so deduplication matches on
   timestamp (±2s), mode, mode2 and WPM.
+- CSV/JSON imports are user-supplied data. They are stored as `summary` fidelity,
+  labelled `file` in the tests table, and cannot support key-level analysis. Rows
+  without `wpm`, `acc` and `duration` are skipped rather than guessed.
 
 ## Key-level analysis
 
@@ -64,6 +67,13 @@ gap with invented numbers.
   mid-answer keeps the partial text; the popup's single insight is cached only
   after it completes.
 - Context is capped at roughly 5000 tokens; the preview shows the estimate.
+
+## Chat rendering
+
+- Answers render as markdown through `marked` and are sanitised with DOMPurify.
+  Images, media, iframes, forms and inline styles are removed, and links are forced
+  to open in a new tab, so model output cannot make a request or run script.
+- Tables and long code blocks scroll horizontally inside the message.
 
 ## Storage and platform
 

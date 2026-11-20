@@ -62,7 +62,7 @@ export const capturedTestSchema = z.object({
 	testDuration: z.number().positive(),
 	bailedOut: z.boolean(),
 	fidelity: z.enum(["full", "summary"]),
-	metricsSource: z.enum(["monkeytype", "computed"]),
+	metricsSource: z.enum(["monkeytype", "computed", "file"]),
 	keyStats: keyDerivedStatsSchema.nullable(),
 	excludedReason: z.string().max(60).nullable(),
 });

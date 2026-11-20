@@ -44,8 +44,9 @@ preview.
   script, and no telemetry is sent anywhere.
 - **Looks native.** Theme colours and roundness are sampled from your Monkeytype tab,
   so the extension matches whatever theme you use.
-- **History import.** Pull older results with a Monkeytype ApeKey, clearly marked as
-  headline-only data.
+- **History import.** Pull older results with a Monkeytype ApeKey, or import a CSV/JSON
+  file, clearly marked as headline-only data.
+- **Readable coaching.** Answers render as sanitised markdown with lists, code and links.
 
 ## Screenshots
 
@@ -128,7 +129,7 @@ apps/extension/
   src/storage/         IndexedDB repositories, settings, credentials
   src/ui/              React dashboard and popup (plain CSS, Monkeytype tokens)
   src/styles/base.css  token-parity stylesheet
-  tests/               55 unit and DOM tests, including a real captured event log
+  tests/               77 unit and DOM tests, including a real captured event log
   scripts/             headless verification and screenshot tooling
 docs/
   design-system.md     tokens, component behaviour, licensing notes

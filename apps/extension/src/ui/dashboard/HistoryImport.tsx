@@ -1,7 +1,9 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ChangeEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { browser } from "wxt/browser";
+import { importFromFile } from "@/monkeytype/file-import";
 import { importHistory } from "@/monkeytype/import-service";
 import { getApeKey, removeApeKey, setApeKey } from "@/storage/ape-key";
+import { addTests, listTests } from "@/storage/tests-repo";
 import { Panel } from "@/ui/components/Panel";
 import type { CaptureData } from "@/ui/useCaptureData";
 
@@ -11,6 +13,7 @@ export function HistoryImport(props: { data: CaptureData }): ReactNode {
 	const [keyInput, setKeyInput] = useState("");
 	const [hasKey, setHasKey] = useState<boolean | null>(null);
 	const [busy, setBusy] = useState(false);
+	const fileRef = useRef<HTMLInputElement | null>(null);
 	const [status, setStatus] = useState<{
 		tone: "ok" | "error" | "info";
 		text: string;
@@ -40,6 +43,32 @@ export function HistoryImport(props: { data: CaptureData }): ReactNode {
 		setStatus({ tone: "info", text: "ApeKey removed." });
 	};
 
+	const onFile = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+		const file = event.target.files?.[0];
+		event.target.value = "";
+		if (file === undefined) return;
+		setBusy(true);
+		setStatus({ tone: "info", text: `Reading ${file.name}…` });
+		try {
+			const text = await file.text();
+			const existing = await listTests();
+			const { tests, summary } = importFromFile(text, file.name, existing);
+			if (tests.length > 0) await addTests(tests);
+			await props.data.reload();
+			setStatus({
+				tone: tests.length > 0 ? "ok" : "info",
+				text: `${summary.format.toUpperCase()} · ${summary.total} rows read · ${summary.imported} imported · ${summary.duplicates} already present · ${summary.invalid} skipped.`,
+			});
+		} catch (error) {
+			setStatus({
+				tone: "error",
+				text: error instanceof Error ? error.message : String(error),
+			});
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	const runImport = async (): Promise<void> => {
 		setBusy(true);
 		setStatus({ tone: "info", text: "Asking Monkeytype for your results…" });
@@ -65,10 +94,28 @@ export function HistoryImport(props: { data: CaptureData }): ReactNode {
 			<div className="mtai-stack">
 				<p className="mtai-note">
 					Monkeytype keeps results on its servers, not in the page, so older tests can
-					only come from its documented API using an ApeKey from your account (account →
-					ape keys). The ApeKey is used only for this request and is stored apart from AI
-					keys.
+					only come from its documented API using an ApeKey from your account. Create one
+					in account settings → ape keys. The key is used only for this request and is
+					stored apart from AI keys.
 				</p>
+				<div className="mtai-row-tight">
+					<a
+						className="mtai-button mtai-button--active"
+						href="https://monkeytype.com/account-settings?tab=apeKeys"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						generate new key
+					</a>
+					<a
+						className="mtai-button mtai-button--ghost"
+						href="https://api.monkeytype.com/docs"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						api docs
+					</a>
+				</div>
 				<div className="mtai-field">
 					<span className="mtai-field__label">monkeytype apekey</span>
 					<div className="mtai-key-row">
@@ -98,6 +145,16 @@ export function HistoryImport(props: { data: CaptureData }): ReactNode {
 					</div>
 				</div>
 				<div className="mtai-row-tight">
+					<button type="button" onClick={() => fileRef.current?.click()} disabled={busy}>
+						import from file
+					</button>
+					<input
+						ref={fileRef}
+						type="file"
+						accept=".json,.csv,application/json,text/csv"
+						hidden
+						onChange={(event) => void onFile(event)}
+					/>
 					<button
 						type="button"
 						className="mtai-button--ghost"

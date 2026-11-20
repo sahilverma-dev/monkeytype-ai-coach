@@ -496,6 +496,7 @@ export function Dashboard(): ReactNode {
 													</td>
 													<td className="text-sub">
 														{test.fidelity === "full" ? "keys" : "summary"}
+														{test.metricsSource === "file" ? " · file" : ""}
 														{test.excludedReason === null
 															? ""
 															: ` · ${test.excludedReason}`}

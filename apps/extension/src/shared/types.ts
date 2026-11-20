@@ -2,7 +2,7 @@ export type TestMode = "time" | "words" | "quote" | "zen" | "custom";
 
 export type CaptureFidelity = "full" | "summary";
 
-export type MetricsSource = "monkeytype" | "computed";
+export type MetricsSource = "monkeytype" | "computed" | "file";
 
 /** How the headline numbers were obtained, so the UI never pretends. */
 export interface CapturedMetrics {
