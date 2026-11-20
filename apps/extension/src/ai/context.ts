@@ -80,6 +80,8 @@ export interface CoachData {
 	chars: CharAnalysis;
 	weaknesses: Weakness[];
 	context: CoachContext;
+	/** Tests in the selected window, newest first. */
+	windowed: CapturedTest[];
 }
 
 function isoDate(timestamp: number): string {
@@ -211,7 +213,7 @@ export function buildCoachData(
 			: [],
 	};
 
-	return { stats, chars, weaknesses, context };
+	return { stats, chars, weaknesses, context, windowed };
 }
 
 function line(label: string, value: string | number | null): string {

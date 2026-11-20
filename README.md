@@ -37,8 +37,11 @@ preview.
 - **Bring your own model.** OpenAI, Anthropic Claude, Google Gemini, OpenRouter and
   any OpenAI-compatible endpoint, through the [Vercel AI SDK](https://ai-sdk.dev).
   Streaming, model discovery, connection test, normalised errors.
-- **Two chat surfaces.** A coach tab in the dashboard and a chat button on the
-  Monkeytype page itself that inherits the site's own styles.
+- **Two chat surfaces.** A coach tab in the dashboard and a movable, resizable
+  mascot-launched window on the Monkeytype page that inherits the site's own styles.
+- **Visual evidence in chat.** Every coach answer sits under a live snapshot of the
+  window: WPM and accuracy sparklines, the key stats and the top problem keys — real
+  data, rendered as charts and bars rather than a wall of numbers.
 - **Privacy by construction.** The exact prompt is previewable before sending, key
   data and recent-test summaries are optional, credentials never enter a content
   script, and no telemetry is sent anywhere.
@@ -58,6 +61,10 @@ preview.
 | Trends, comparisons and spread                    | Per-key error rates and slow pairs                  |
 
 ![Popup](docs/screenshots/popup.png)
+
+![Coach launcher](docs/screenshots/inpage-launcher.png)
+
+The coach opens from the mascot button in the bottom-right corner, stays hidden while a test is running, and the window can be dragged and resized.
 
 ## Install
 
@@ -129,7 +136,7 @@ apps/extension/
   src/storage/         IndexedDB repositories, settings, credentials
   src/ui/              React dashboard and popup (plain CSS, Monkeytype tokens)
   src/styles/base.css  token-parity stylesheet
-  tests/               77 unit and DOM tests, including a real captured event log
+  tests/               82 unit and DOM tests, including a real captured event log
   scripts/             headless verification and screenshot tooling
 docs/
   design-system.md     tokens, component behaviour, licensing notes

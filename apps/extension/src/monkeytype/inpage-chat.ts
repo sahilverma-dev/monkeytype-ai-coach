@@ -1,10 +1,13 @@
 import { browser } from "wxt/browser";
+import type { CoachSnapshot } from "@/ai/snapshot";
+import { runtimeUrl } from "@/shared/extension-url";
 import { renderMarkdown } from "@/shared/markdown";
 import {
 	CHAT_PORT_NAME,
 	type ChatPortEvent,
 	type ChatPortRequest,
 } from "@/shared/port-protocol";
+import { sparklineSvg } from "@/shared/sparkline";
 
 /**
  * The in-page coach.
@@ -18,19 +21,20 @@ import {
 const STYLE_ID = "mtai-inpage-style";
 
 const CSS = `
-.mtai-launcher{position:fixed;right:18px;bottom:18px;z-index:2147483000;width:44px;height:44px;border-radius:100%;display:grid;place-items:center;padding:0;border:none;background:var(--main-color);color:var(--bg-color);cursor:pointer;box-shadow:0 0 0 1px color-mix(in srgb,var(--bg-color) 60%,transparent);transition:background .125s,color .125s,transform .125s}
-.mtai-launcher:hover{background:var(--text-color);color:var(--bg-color)}
+.mtai-launcher{position:fixed;right:18px;bottom:18px;z-index:2147483000;width:52px;height:52px;border-radius:calc(var(--roundness) * 1.4);display:grid;place-items:center;padding:2px;border:1px solid color-mix(in srgb,var(--sub-color) 40%,transparent);background:var(--bg-color);cursor:pointer;transition:background .125s,border-color .125s,transform .125s}
+.mtai-launcher:hover{background:var(--sub-alt-color);border-color:var(--text-color);transform:translateY(-1px)}
 .mtai-launcher:focus-visible{outline:none;box-shadow:0 0 0 .1rem var(--bg-color),0 0 0 .2rem var(--text-color)}
-.mtai-launcher svg{width:22px;height:22px;display:block}
+.mtai-launcher__icon{width:100%;height:100%;object-fit:contain;display:block}
 .mtai-launcher[hidden]{display:none}
-.mtai-panel{position:fixed;right:18px;bottom:74px;z-index:2147483001;width:min(380px,calc(100vw - 36px));max-height:min(600px,72vh);display:flex;flex-direction:column;background:var(--bg-color);color:var(--text-color);font-family:var(--font);border:1px solid color-mix(in srgb,var(--sub-color) 40%,transparent);border-radius:var(--roundness);overflow:hidden}
+.mtai-panel{position:fixed;left:0;top:0;z-index:2147483001;width:380px;height:560px;min-width:320px;min-height:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 90px);display:flex;flex-direction:column;background:var(--bg-color);color:var(--text-color);font-family:var(--font);border:1px solid color-mix(in srgb,var(--sub-color) 40%,transparent);border-radius:var(--roundness);overflow:hidden;resize:both}
+.mtai-panel::after{content:"";position:absolute;right:5px;bottom:5px;width:9px;height:9px;border-right:2px solid var(--sub-color);border-bottom:2px solid var(--sub-color);opacity:.55;pointer-events:none}
 .mtai-panel[hidden]{display:none}
 .mtai-panel__head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.55rem .7rem;border-bottom:1px solid color-mix(in srgb,var(--sub-color) 25%,transparent)}
 .mtai-panel__title{font-size:.8rem;color:var(--main-color);white-space:nowrap}
 .mtai-panel__model{font-size:.65rem;color:var(--sub-color);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:right}
 .mtai-panel__icon{width:1.6rem;height:1.6rem;padding:0;font-size:.9rem;line-height:1;background:none;color:var(--sub-color);display:grid;place-items:center;flex:none}
 .mtai-panel__icon:hover{background:none;color:var(--text-color)}
-.mtai-panel__body{padding:.7rem;overflow-y:auto;display:flex;flex-direction:column;gap:.55rem;flex:1 1 auto;min-height:7rem}
+.mtai-panel__body{padding:.7rem;overflow-y:auto;display:flex;flex-direction:column;gap:.55rem;flex:1 1 auto;min-height:0}
 .mtai-panel__msg{font-size:.8rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;padding:.5rem .6rem;border-radius:var(--roundness);max-width:92%}
 .mtai-panel__msg--user{align-self:flex-end;background:var(--sub-alt-color)}
 .mtai-panel__msg--assistant{align-self:flex-start;background:none;border-left:2px solid var(--main-color);border-radius:0;padding-left:.6rem;white-space:normal}
@@ -47,6 +51,22 @@ const CSS = `
 .mtai-panel__msg blockquote{margin:.3em 0;padding-left:.6em;border-left:2px solid var(--sub-color);color:var(--sub-color)}
 .mtai-panel__msg--pending{color:var(--sub-color)}
 .mtai-panel__msg--error{color:var(--error-color);border-left-color:var(--error-color)}
+.mtai-panel__msg table{display:block;max-width:100%;overflow-x:auto;margin:.4em 0 .6em;border-collapse:collapse;font-size:.72rem}
+.mtai-panel__msg th,.mtai-panel__msg td{padding:.2em .4em;border:1px solid color-mix(in srgb,var(--sub-color) 30%,transparent);text-align:left;white-space:nowrap}
+.mtai-panel__msg th{color:var(--sub-color);font-weight:400}
+.mtai-panel__snap{display:flex;flex-direction:column;gap:.4rem;padding:.55rem .7rem;border-bottom:1px solid color-mix(in srgb,var(--sub-color) 25%,transparent);background:color-mix(in srgb,var(--sub-color) 18%,transparent)}
+.mtai-panel__snap-stats{display:flex;flex-wrap:wrap;align-items:baseline;gap:.15rem 1rem;font-size:.65rem;color:var(--sub-color);font-variant-numeric:tabular-nums}
+.mtai-panel__snap-stats b{font-weight:400;font-size:.95rem;color:var(--main-color);margin-right:.35em}
+.mtai-panel__snap-window{margin-left:auto}
+.mtai-panel__snap-charts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.mtai-panel__snap-chart{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.mtai-panel__snap-chart>span{font-size:.6rem;color:var(--sub-color)}
+.mtai-panel__snap .mtai-spark{height:34px}
+.mtai-spark{display:block;width:100%;overflow:visible}
+.mtai-spark__line{fill:none;stroke:var(--main-color);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.mtai-spark__area{fill:var(--main-color);opacity:.12}
+.mtai-panel__snap-keys{display:flex;flex-wrap:wrap;gap:.35rem .6rem;font-size:.65rem;color:var(--sub-color)}
+.mtai-panel__snap-key b{font-weight:400;color:var(--text-color)}
 .mtai-panel__chips{display:flex;flex-wrap:wrap;gap:.35rem;padding:0 .7rem .4rem}
 .mtai-panel__chip{padding:.25em .55em;font-size:.7rem;background:none;border:1px solid color-mix(in srgb,var(--sub-color) 40%,transparent);color:var(--sub-color);border-radius:calc(var(--roundness) / 2)}
 .mtai-panel__chip:hover{background:none;color:var(--text-color);border-color:var(--text-color)}
@@ -81,9 +101,6 @@ function element<K extends keyof HTMLElementTagNameMap>(
 	return node;
 }
 
-const BUBBLE_ICON =
-	'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.9 9.9 0 0 1-4-.8L3 21l1.9-4.6a8.2 8.2 0 0 1-.9-3.7 8.4 8.4 0 0 1 8.5-8.4 8.4 8.4 0 0 1 8.5 8.2z"/></svg>';
-
 export function mountInpageChat(): void {
 	if (document.querySelector(".mtai-launcher") !== null) return;
 	ensureStyles();
@@ -93,10 +110,14 @@ export function mountInpageChat(): void {
 	launcher.setAttribute("aria-label", "Ask the AI typing coach");
 	launcher.setAttribute("aria-expanded", "false");
 	launcher.title = "Ask your typing coach";
-	launcher.innerHTML = BUBBLE_ICON;
+	const launcherIcon = element("img", "mtai-launcher__icon");
+	launcherIcon.src = runtimeUrl("icon/128.png");
+	launcherIcon.alt = "";
+	launcher.append(launcherIcon);
 
 	let panel: HTMLElement | null = null;
 	let body: HTMLElement | null = null;
+	let snapEl: HTMLElement | null = null;
 	let chips: HTMLElement | null = null;
 	let modelLabel: HTMLElement | null = null;
 	let statusEl: HTMLElement | null = null;
@@ -111,6 +132,55 @@ export function mountInpageChat(): void {
 	let focusBeforeOpen: HTMLElement | null = null;
 
 	let port: ReturnType<typeof browser.runtime.connect> | null = null;
+
+	const GEOMETRY_KEY = "mtai.chatGeometry";
+	const DEFAULT_SIZE = { width: 380, height: 620 };
+	const MIN_WIDTH = 320;
+	const MIN_HEIGHT = 320;
+	const MARGIN = 12;
+
+	interface PanelGeometry {
+		left: number;
+		top: number;
+		width: number;
+		height: number;
+	}
+
+	const escapeHtml = (value: string): string =>
+		value
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;");
+
+	const renderSnapshot = (snapshot: CoachSnapshot): void => {
+		if (snapEl === null) return;
+		const wpm = snapshot.stats.wpm === null ? "—" : snapshot.stats.wpm.toFixed(1);
+		const acc = snapshot.stats.acc === null ? "—" : `${snapshot.stats.acc.toFixed(1)}%`;
+		const cons =
+			snapshot.stats.consistency === null
+				? "—"
+				: `${snapshot.stats.consistency.toFixed(1)}%`;
+		const keys = snapshot.topKeys
+			.map(
+				(key) =>
+					`<span class="mtai-panel__snap-key"><b>${escapeHtml(key.char)}</b> ${key.errorRate.toFixed(1)}%</span>`,
+			)
+			.join("");
+		snapEl.innerHTML = `
+			<div class="mtai-panel__snap-stats">
+				<span><b>${wpm}</b>wpm</span>
+				<span><b>${acc}</b>acc</span>
+				<span><b>${cons}</b>cons</span>
+				<span class="mtai-panel__snap-window">${snapshot.validTests} tests</span>
+			</div>
+			<div class="mtai-panel__snap-charts">
+				<div class="mtai-panel__snap-chart"><span>wpm</span>${sparklineSvg(snapshot.wpmSeries, "wpm")}</div>
+				<div class="mtai-panel__snap-chart"><span>accuracy</span>${sparklineSvg(snapshot.accSeries, "accuracy")}</div>
+			</div>
+			<div class="mtai-panel__snap-keys"><span>top keys</span>${keys === "" ? "<span>no key data</span>" : keys}</div>
+		`;
+	};
 
 	const scrollToEnd = (): void => {
 		if (body !== null) body.scrollTop = body.scrollHeight;
@@ -170,6 +240,7 @@ export function mountInpageChat(): void {
 	const handleEvent = (event: ChatPortEvent): void => {
 		switch (event.type) {
 			case "state": {
+				renderSnapshot(event.snapshot);
 				if (modelLabel !== null) {
 					modelLabel.textContent = event.configured
 						? `${event.provider} · ${event.model}`
@@ -207,11 +278,14 @@ export function mountInpageChat(): void {
 				return;
 			}
 			case "chunk": {
-				if (streamingEl === null)
+				if (streamingEl === null) {
 					streamingEl = appendMessage("assistant", "", "mtai-panel__msg--pending");
+					streamBuffer = "";
+				}
 				if (streamingEl !== null) {
 					streamingEl.classList.remove("mtai-panel__msg--pending");
-					streamingEl.textContent += event.text;
+					streamBuffer += event.text;
+					streamingEl.innerHTML = renderMarkdown(streamBuffer);
 					scrollToEnd();
 				}
 				return;
@@ -226,12 +300,14 @@ export function mountInpageChat(): void {
 			}
 			case "aborted": {
 				streamingEl = null;
+				streamBuffer = "";
 				setBusy(false);
 				setStatus("stopped.");
 				return;
 			}
 			case "error": {
 				streamingEl = null;
+				streamBuffer = "";
 				setBusy(false);
 				appendMessage("assistant", event.message, "mtai-panel__msg--error");
 				const fix = element("button", "mtai-panel__link", "open settings");
@@ -287,6 +363,76 @@ export function mountInpageChat(): void {
 		connection.postMessage({ type: "send", text } satisfies ChatPortRequest);
 	};
 
+	const readSavedGeometry = (): Partial<PanelGeometry> => {
+		try {
+			const raw = localStorage.getItem(GEOMETRY_KEY);
+			if (raw === null) return {};
+			const parsed = JSON.parse(raw) as Partial<Record<keyof PanelGeometry, unknown>>;
+			const geometry: Partial<PanelGeometry> = {};
+			for (const key of ["left", "top", "width", "height"] as const) {
+				const value = parsed[key];
+				if (typeof value === "number" && Number.isFinite(value)) geometry[key] = value;
+			}
+			return geometry;
+		} catch {
+			return {};
+		}
+	};
+
+	const saveGeometry = (): void => {
+		if (panel === null) return;
+		const rect = panel.getBoundingClientRect();
+		try {
+			localStorage.setItem(
+				GEOMETRY_KEY,
+				JSON.stringify({
+					left: Math.round(rect.left),
+					top: Math.round(rect.top),
+					width: Math.round(rect.width),
+					height: Math.round(rect.height),
+				}),
+			);
+		} catch {
+			// storage full or disabled; the geometry still applies for this session
+		}
+	};
+
+	const clampGeometry = (geometry: PanelGeometry): PanelGeometry => {
+		const maxWidth = Math.max(MIN_WIDTH, window.innerWidth - MARGIN * 2);
+		const maxHeight = Math.max(MIN_HEIGHT, window.innerHeight - MARGIN * 2);
+		const width = Math.min(Math.max(geometry.width, MIN_WIDTH), maxWidth);
+		const height = Math.min(Math.max(geometry.height, MIN_HEIGHT), maxHeight);
+		const left = Math.min(
+			Math.max(geometry.left, MARGIN),
+			Math.max(MARGIN, window.innerWidth - width - MARGIN),
+		);
+		const top = Math.min(
+			Math.max(geometry.top, MARGIN),
+			Math.max(MARGIN, window.innerHeight - height - MARGIN),
+		);
+		return { left, top, width, height };
+	};
+
+	/** Keep the window fully inside the viewport after resizes. */
+	const applyGeometry = (): void => {
+		if (panel === null) return;
+		const rect = panel.getBoundingClientRect();
+		const next = clampGeometry({
+			left: rect.left,
+			top: rect.top,
+			width: rect.width || DEFAULT_SIZE.width,
+			height: rect.height || DEFAULT_SIZE.height,
+		});
+		if (Math.round(next.width) !== Math.round(rect.width)) {
+			panel.style.width = `${next.width}px`;
+		}
+		if (Math.round(next.height) !== Math.round(rect.height)) {
+			panel.style.height = `${next.height}px`;
+		}
+		panel.style.left = `${next.left}px`;
+		panel.style.top = `${next.top}px`;
+	};
+
 	const buildPanel = (): HTMLElement => {
 		const root = element("div", "mtai-panel");
 		root.setAttribute("role", "dialog");
@@ -301,7 +447,49 @@ export function mountInpageChat(): void {
 		close.setAttribute("aria-label", "Close coach");
 		close.addEventListener("click", () => closePanel());
 		head.append(title, modelLabel, close);
+		head.style.userSelect = "none";
+		head.style.cursor = "grab";
+		head.addEventListener("pointerdown", (event) => {
+			if (panel === null) return;
+			if (event.button !== 0) return;
+			if (
+				event.target instanceof Element &&
+				event.target.closest("button, a, input, textarea, select") !== null
+			) {
+				return;
+			}
+			const startX = event.clientX;
+			const startY = event.clientY;
+			const startRect = panel.getBoundingClientRect();
+			const startLeft = startRect.left;
+			const startTop = startRect.top;
+			head.setPointerCapture(event.pointerId);
+			head.style.cursor = "grabbing";
 
+			const onMove = (move: PointerEvent): void => {
+				if (panel === null) return;
+				const next = clampGeometry({
+					left: startLeft + (move.clientX - startX),
+					top: startTop + (move.clientY - startY),
+					width: startRect.width,
+					height: startRect.height,
+				});
+				panel.style.left = `${next.left}px`;
+				panel.style.top = `${next.top}px`;
+			};
+			const onUp = (): void => {
+				head.releasePointerCapture(event.pointerId);
+				head.removeEventListener("pointermove", onMove);
+				head.removeEventListener("pointerup", onUp);
+				head.style.cursor = "grab";
+				saveGeometry();
+			};
+			head.addEventListener("pointermove", onMove);
+			head.addEventListener("pointerup", onUp);
+			event.preventDefault();
+		});
+
+		snapEl = element("div", "mtai-panel__snap");
 		body = element("div", "mtai-panel__body");
 		chips = element("div", "mtai-panel__chips");
 		statusEl = element("div", "mtai-panel__status");
@@ -359,7 +547,7 @@ export function mountInpageChat(): void {
 		);
 
 		actions.append(newChat, preview, dashboard);
-		root.append(head, body, chips, statusEl, previewEl, form, actions);
+		root.append(head, snapEl, body, chips, statusEl, previewEl, form, actions);
 
 		// Monkeytype listens for keys at document level; keep its shortcuts out of
 		// the panel while still letting the textarea receive normal input.
@@ -383,8 +571,35 @@ export function mountInpageChat(): void {
 		if (panel === null) {
 			panel = buildPanel();
 			document.body.append(panel);
+
+			let saveTimer: number | null = null;
+			new ResizeObserver(() => {
+				// Hiding the panel reports a 0x0 size; do not treat that as a resize.
+				if (panel === null || panel.hidden) return;
+				applyGeometry();
+				if (saveTimer !== null) window.clearTimeout(saveTimer);
+				saveTimer = window.setTimeout(() => {
+					saveTimer = null;
+					if (panel !== null && !panel.hidden) saveGeometry();
+				}, 250);
+			}).observe(panel);
+
+			const saved = readSavedGeometry();
+			const width = saved.width ?? DEFAULT_SIZE.width;
+			const height = saved.height ?? DEFAULT_SIZE.height;
+			const initial = clampGeometry({
+				width,
+				height,
+				left: saved.left ?? window.innerWidth - width - 18,
+				top: saved.top ?? window.innerHeight - height - 74,
+			});
+			panel.style.width = `${initial.width}px`;
+			panel.style.height = `${initial.height}px`;
+			panel.style.left = `${initial.left}px`;
+			panel.style.top = `${initial.top}px`;
 		}
 		panel.hidden = false;
+		applyGeometry();
 		launcher.hidden = true;
 		launcher.setAttribute("aria-expanded", "true");
 		isOpen = true;
@@ -395,6 +610,7 @@ export function mountInpageChat(): void {
 	};
 
 	const closePanel = (): void => {
+		if (panel !== null && !panel.hidden) saveGeometry();
 		if (panel !== null) panel.hidden = true;
 		launcher.hidden = false;
 		launcher.setAttribute("aria-expanded", "false");
@@ -410,6 +626,10 @@ export function mountInpageChat(): void {
 	launcher.addEventListener("click", () => {
 		if (isOpen) closePanel();
 		else openPanel();
+	});
+
+	window.addEventListener("resize", () => {
+		if (isOpen) applyGeometry();
 	});
 
 	// Keep the launcher out of the way while a test is running.

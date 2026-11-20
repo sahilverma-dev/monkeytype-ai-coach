@@ -10,6 +10,7 @@ import { getApiKey } from "@/storage/credentials";
 import { getSettings } from "@/storage/settings";
 import { buildPreview, buildSuggestions } from "./prompt";
 import { loadCoachData, messagesForPrompt, streamCoachReply } from "./service";
+import { buildSnapshot } from "./snapshot";
 
 /**
  * Chat for the in-page panel.
@@ -54,6 +55,7 @@ export function registerChatPort(): void {
 						content: message.content,
 					})) ?? [],
 				suggestions: buildSuggestions(data),
+				snapshot: buildSnapshot(data),
 			});
 		};
 

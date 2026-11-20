@@ -63,6 +63,17 @@ output cannot make a network request. Links open in a new tab with
 `rel="noopener noreferrer"`. Headings, lists, code blocks, quotes and tables use
 the same tokens as the rest of the interface.
 
+## Chat surfaces
+
+- The dashboard coach and the in-page panel show the same **snapshot** above the
+  conversation: WPM and accuracy sparklines, the window statistics and the top
+  problem keys, all computed locally from the selected tests.
+- The in-page launcher uses the extension icon (`icon/128.png`, declared as a
+  web-accessible resource) rather than a drawn glyph.
+- The panel is a floating window: drag its header to move it, drag the bottom-right
+  corner to resize, and the geometry is clamped to the viewport and remembered in
+  `localStorage`.
+
 ## Where each stylesheet is used
 
 - **Extension pages** (popup, dashboard, options) load `src/styles/base.css`.

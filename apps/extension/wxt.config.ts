@@ -21,6 +21,12 @@ export default defineConfig({
 			"https://api.monkeytype.com/*",
 		],
 		minimum_chrome_version: "111",
+		web_accessible_resources: [
+			{
+				resources: ["icon/128.png"],
+				matches: ["https://monkeytype.com/*", "https://www.monkeytype.com/*"],
+			},
+		],
 		icons: {
 			16: "icon/16.png",
 			32: "icon/32.png",

@@ -11,6 +11,8 @@ export interface PortMessage {
 	content: string;
 }
 
+import type { CoachSnapshot } from "@/ai/snapshot";
+
 export type ChatPortEvent =
 	| {
 			type: "state";
@@ -20,6 +22,7 @@ export type ChatPortEvent =
 			conversationId: string | null;
 			messages: PortMessage[];
 			suggestions: string[];
+			snapshot: CoachSnapshot;
 	  }
 	| { type: "chunk"; text: string }
 	| { type: "done"; conversationId: string }

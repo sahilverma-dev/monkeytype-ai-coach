@@ -398,8 +398,52 @@ try {
 		if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 	});
 	await page.waitForSelector(".mtai-launcher:not([hidden])", { timeout: 10_000 });
+	const launcher = await page.evaluate(() => {
+		const image = document.querySelector(".mtai-launcher img");
+		return image instanceof HTMLImageElement
+			? { src: image.src, loaded: image.complete && image.naturalWidth > 0 }
+			: null;
+	});
+	if (launcher === null || !launcher.src.includes("icon/128.png") || !launcher.loaded) {
+		throw new Error(`launcher mascot missing or not loaded: ${JSON.stringify(launcher)}`);
+	}
+	console.log("[verify-ai] mascot launcher loaded");
+
 	await page.click(".mtai-launcher");
 	await page.waitForSelector(".mtai-panel:not([hidden]) textarea");
+	await page.waitForSelector(".mtai-panel__snap .mtai-spark", { timeout: 10_000 });
+	const resizeStyle = await page.$eval(
+		".mtai-panel",
+		(element) => getComputedStyle(element).resize,
+	);
+	if (resizeStyle !== "both") throw new Error(`panel is not resizable: ${resizeStyle}`);
+	await page.evaluate(() => {
+		const panel = document.querySelector(".mtai-panel");
+		if (!(panel instanceof HTMLElement)) return;
+		panel.style.left = "80px";
+		panel.style.top = "60px";
+		panel.style.width = "460px";
+		panel.style.height = "600px";
+	});
+	await page.waitForTimeout(500);
+	await page.click(".mtai-panel__head button");
+	await page.waitForSelector(".mtai-launcher:not([hidden])");
+	await page.click(".mtai-launcher");
+	await page.waitForSelector(".mtai-panel:not([hidden])");
+	const restored = await page.$eval(".mtai-panel", (element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			width: Math.round(rect.width),
+			height: Math.round(rect.height),
+			left: Math.round(rect.left),
+			top: Math.round(rect.top),
+		};
+	});
+	if (restored.width !== 460 || restored.height !== 600 || restored.left !== 80) {
+		throw new Error(`panel geometry was not restored: ${JSON.stringify(restored)}`);
+	}
+	console.log("[verify-ai] panel resized and geometry restored");
+
 	await page.fill(".mtai-panel textarea", "How consistent is my typing?");
 	await page.click(".mtai-panel form button[type=submit]");
 	await page.waitForFunction(

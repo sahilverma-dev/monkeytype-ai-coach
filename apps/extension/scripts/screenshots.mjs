@@ -302,8 +302,19 @@ try {
 		if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 	});
 	await page.waitForSelector(".mtai-launcher:not([hidden])", { timeout: 10_000 });
+	const viewport = page.viewportSize() ?? { width: 1280, height: 900 };
+	await page.screenshot({
+		path: join(outDir, "inpage-launcher.png"),
+		clip: {
+			x: Math.max(0, viewport.width - 300),
+			y: Math.max(0, viewport.height - 220),
+			width: 280,
+			height: 200,
+		},
+	});
 	await page.click(".mtai-launcher");
 	await page.waitForSelector(".mtai-panel:not([hidden]) .mtai-panel__msg");
+	await page.waitForSelector(".mtai-panel__snap .mtai-spark");
 	// Show the start of the thread rather than the scroll-to-bottom position.
 	await page.evaluate(() => {
 		const body = document.querySelector(".mtai-panel__body");

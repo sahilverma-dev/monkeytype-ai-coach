@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { buildCoachData } from "@/ai/context";
 import { buildPreview, buildSuggestions } from "@/ai/prompt";
 import { streamCoachReply } from "@/ai/service";
+import { buildSnapshot } from "@/ai/snapshot";
 import { renderMarkdown } from "@/shared/markdown";
 import {
 	getConversation,
@@ -13,6 +14,7 @@ import { hasApiKey } from "@/storage/credentials";
 import { Panel } from "@/ui/components/Panel";
 import { formatNumber, formatPercent, relativeTime } from "@/ui/format";
 import type { CaptureData } from "@/ui/useCaptureData";
+import { CoachSnapshotCard } from "./CoachSnapshot";
 
 function errorText(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
@@ -90,6 +92,7 @@ export function CoachTab(props: {
 	);
 
 	const suggestions = useMemo(() => buildSuggestions(coachData), [coachData]);
+	const snapshot = useMemo(() => buildSnapshot(coachData), [coachData]);
 
 	const preview = useMemo(
 		() =>
@@ -241,6 +244,8 @@ export function CoachTab(props: {
 			}
 		>
 			<div className="mtai-stack">
+				<CoachSnapshotCard snapshot={snapshot} />
+
 				<div className="mtai-row">
 					<div className="mtai-row-tight">
 						<select
