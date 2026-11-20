@@ -11,7 +11,8 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"postinstall": "wxt prepare",
-		"verify:live": "node scripts/verify-capture.mjs"
+		"verify:live": "node scripts/verify-capture.mjs",
+		"verify:ai": "node scripts/verify-ai.mjs"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^4.0.106",

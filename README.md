@@ -9,18 +9,23 @@ Your typing data. Your AI provider. Your personal typing coach.
 
 ## Status
 
-Milestone 1 is complete and installable:
+Milestones 1 and 2 are complete and installable:
 
 - capture of completed tests on `monkeytype.com`, including per-keystroke error
   data from the page's in-memory test log
 - deterministic local analytics (averages, trends, personal bests, per-key error
   rates, confusion pairs, typing rhythm) with an evidence-based weakness engine
-- Monkeytype-native dashboard (overview, keys, tests, settings) and popup
-- theme sync: the extension uses the colours and font of your active Monkeytype theme
+- Monkeytype-native dashboard (overview, keys, coach, tests, settings) and popup
+- bring-your-own-model coaching through the Vercel AI SDK: OpenAI, Anthropic,
+  Gemini, OpenRouter and custom OpenAI-compatible endpoints, streaming, model
+  discovery, connection testing and normalised errors
+- a chat panel on the Monkeytype page itself, plus a dashboard coach tab, both
+  grounded in the same local analysis
+- an exact "preview context" view and toggles for what is shared
+- theme sync: the extension uses the colours of your active Monkeytype theme
 
-The AI provider layer (OpenAI, Anthropic, Gemini, OpenRouter, custom endpoints via
-the Vercel AI SDK), the in-page chat, and history import arrive in the next
-milestones. See `docs/` for the design decisions and known limits.
+History import with a Monkeytype ApeKey and the packaging/polish pass are next.
+See `docs/` for design decisions and known limits.
 
 ## Quick start
 
@@ -71,6 +76,8 @@ apps/extension/
 docs/
   design-system.md       tokens, component behaviour, licensing notes
   install.md             build and load instructions
+  providers.md           provider setup, model discovery, error handling
+  privacy.md             what is stored, what is sent, permissions
 ```
 
 ## Commands

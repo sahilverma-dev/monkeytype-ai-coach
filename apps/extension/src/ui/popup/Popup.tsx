@@ -1,7 +1,11 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
+import { ensureProviderPermission } from "@/ai/permissions";
+import { QUICK_INSIGHT_PROMPT } from "@/ai/prompt";
+import { generateQuickInsight, getCachedInsight, type QuickInsight } from "@/ai/service";
 import { computeWindowStats } from "@/analytics/overview";
 import { runtimeUrl } from "@/shared/extension-url";
+import { getApiKey } from "@/storage/credentials";
 import { Stat, StatGrid } from "@/ui/components/Stat";
 import { formatMode, formatNumber, formatPercent, relativeTime } from "@/ui/format";
 import { useCaptureData } from "@/ui/useCaptureData";
@@ -16,6 +20,30 @@ export function Popup(): ReactNode {
 	const weekAgo = Date.now() - WEEK_MS;
 	const weekTests = data.tests.filter((test) => test.timestamp >= weekAgo);
 	const weekStats = computeWindowStats(weekTests, "all");
+	const [insight, setInsight] = useState<QuickInsight | null>(null);
+	const [insightBusy, setInsightBusy] = useState(false);
+	const [insightError, setInsightError] = useState<string | null>(null);
+	const [hasProvider, setHasProvider] = useState<boolean | null>(null);
+
+	useEffect(() => {
+		void getCachedInsight().then(setInsight);
+		void getApiKey(data.settings.ai.provider).then((key) => setHasProvider(key !== null));
+	}, [data.settings.ai.provider]);
+
+	const generate = async (): Promise<void> => {
+		setInsightBusy(true);
+		setInsightError(null);
+		try {
+			await ensureProviderPermission(data.settings.ai);
+			setInsight(await generateQuickInsight(QUICK_INSIGHT_PROMPT));
+		} catch (error) {
+			setInsightError(error instanceof Error ? error.message : String(error));
+		} finally {
+			setInsightBusy(false);
+		}
+	};
+
+	const providerReady = hasProvider === true && data.settings.ai.model.trim() !== "";
 
 	const openDashboard = (hash = ""): void => {
 		void browser.tabs.create({ url: runtimeUrl(`/dashboard.html${hash}`) });
@@ -86,6 +114,54 @@ export function Popup(): ReactNode {
 								: ` · ${formatPercent(latest.consistency, 0)} consistency`}
 							{latest.excludedReason === null ? "" : ` · ${latest.excludedReason}`}
 						</span>
+					</section>
+
+					<section className="mtai-card mtai-stack" style={{ gap: "0.35rem" }}>
+						<div className="mtai-row">
+							<span className="mtai-note">quick insight</span>
+							{insight === null ? null : (
+								<span className="mtai-note">{relativeTime(insight.createdAt)}</span>
+							)}
+						</div>
+						{providerReady ? (
+							insight !== null && insight.dataVersion === data.dataVersion ? (
+								<p className="mtai-note">{insight.text}</p>
+							) : (
+								<div className="mtai-row-tight" style={{ alignItems: "center" }}>
+									<button
+										type="button"
+										onClick={() => void generate()}
+										disabled={insightBusy}
+									>
+										{insightBusy
+											? "thinking…"
+											: insight === null
+												? "get insight"
+												: "refresh insight"}
+									</button>
+									<span className="mtai-note">
+										{insight === null
+											? "one short answer from your model"
+											: "based on the current data"}
+									</span>
+									{insight === null ? null : (
+										<span className="mtai-note">new tests since this insight</span>
+									)}
+								</div>
+							)
+						) : (
+							<div className="mtai-row-tight">
+								<span className="mtai-note">connect a provider for coaching.</span>
+								<button type="button" onClick={() => openDashboard("#settings")}>
+									settings
+								</button>
+							</div>
+						)}
+						{insightError === null ? null : (
+							<p className="mtai-note text-error" role="alert">
+								{insightError}
+							</p>
+						)}
 					</section>
 
 					<section className="mtai-stack" style={{ gap: "0.35rem" }}>

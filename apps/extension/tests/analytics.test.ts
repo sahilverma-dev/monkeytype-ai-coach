@@ -167,6 +167,14 @@ describe("detectWeaknesses", () => {
 							confusion: [{ typed: "a", count: 5 }],
 						},
 						{
+							char: "n",
+							attempts: 100,
+							errors: 4,
+							corrected: 4,
+							missed: 0,
+							confusion: [{ typed: "m", count: 4 }],
+						},
+						{
 							char: "e",
 							attempts: 200,
 							errors: 2,

@@ -46,7 +46,12 @@ export function applyTheme(snapshot: ThemeSnapshot | null, follow: boolean): voi
 	const root = document.documentElement;
 	const useTheme = follow && snapshot !== null;
 	for (const variable of VARIABLES) {
-		const value = useTheme ? snapshot[variable.key] : "";
+		let value = useTheme ? String(snapshot[variable.key]) : "";
+		if (variable.key === "font" && !value.includes("Roboto Mono")) {
+			// Only Roboto Mono is bundled; another Monkeytype font would fall back
+			// to an unrelated monospace and look broken.
+			value = "";
+		}
 		if (value === "") {
 			root.style.removeProperty(variable.css);
 		} else {

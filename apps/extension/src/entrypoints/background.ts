@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { registerChatPort } from "@/ai/port-chat";
 import { runtimeUrl } from "@/shared/extension-url";
 import type { RuntimeMessage, RuntimeResponse } from "@/shared/messages";
 import { capturedTestSchema } from "@/shared/schema";
@@ -52,6 +53,7 @@ async function handleMessage(message: RuntimeMessage): Promise<RuntimeResponse> 
 }
 
 export default defineBackground(() => {
+	registerChatPort();
 	browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 		handleMessage(message as RuntimeMessage)
 			.then((response) => sendResponse(response))

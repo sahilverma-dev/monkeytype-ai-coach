@@ -1,5 +1,6 @@
 import { browser } from "wxt/browser";
 import { z } from "zod";
+import { PROVIDER_IDS } from "@/ai/types";
 import { DEFAULT_ANALYSIS_WINDOW, SETTINGS_KEY } from "@/shared/constants";
 import type { ThemeSnapshot } from "@/shared/types";
 
@@ -16,6 +17,18 @@ const themeSnapshotSchema = z.object({
 	sampledAt: z.number(),
 });
 
+const aiSchema = z.object({
+	provider: z.enum(PROVIDER_IDS).default("openai"),
+	model: z.string().max(200).default(""),
+	baseURL: z.string().max(400).nullable().default(null),
+	temperature: z.number().min(0).max(2).default(0.4),
+	maxTokens: z.number().int().min(64).max(8000).default(700),
+	includeKeyData: z.boolean().default(true),
+	includeRecentTests: z.boolean().default(true),
+});
+
+export type AISettings = z.infer<typeof aiSchema>;
+
 export const settingsSchema = z.object({
 	analysisWindow: z
 		.union([
@@ -29,6 +42,7 @@ export const settingsSchema = z.object({
 	captureEnabled: z.boolean().default(true),
 	followMonkeytypeTheme: z.boolean().default(true),
 	theme: themeSnapshotSchema.nullable().default(null),
+	ai: aiSchema.default(aiSchema.parse({})),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -59,20 +73,19 @@ export interface SessionState {
 	testPage: boolean;
 }
 
+const SESSION_STATE_KEY = "mtai.sessionState";
+
 export async function setSessionState(state: SessionState): Promise<void> {
-	try {
-		await browser.storage.session.set({ "mtai.session": state });
-	} catch {
-		// session storage is unavailable in some contexts; the popup just shows unknown.
-	}
+	await browser.storage.local.set({ [SESSION_STATE_KEY]: state });
 }
 
 export async function getSessionState(): Promise<SessionState | null> {
-	try {
-		const stored = await browser.storage.session.get("mtai.session");
-		const value = stored["mtai.session"] as SessionState | undefined;
-		return value ?? null;
-	} catch {
-		return null;
-	}
+	const stored = await browser.storage.local.get(SESSION_STATE_KEY);
+	const value = stored[SESSION_STATE_KEY] as SessionState | undefined;
+	if (value === undefined) return null;
+	return {
+		lastSeenAt: typeof value.lastSeenAt === "number" ? value.lastSeenAt : 0,
+		href: typeof value.href === "string" ? value.href : "",
+		testPage: value.testPage === true,
+	};
 }

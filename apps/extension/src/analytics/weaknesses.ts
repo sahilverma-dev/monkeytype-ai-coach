@@ -123,8 +123,12 @@ export function detectWeaknesses(stats: WindowStats, chars: CharAnalysis): Weakn
 		});
 	}
 
+	const flaggedChars = new Set(keyCandidates.map((entry) => entry.char));
 	const confusion = chars.confusions.find(
-		(entry) => entry.count >= 3 && entry.expected !== entry.typed,
+		(entry) =>
+			entry.count >= 3 &&
+			entry.expected !== entry.typed &&
+			!flaggedChars.has(entry.expected),
 	);
 	if (confusion !== undefined) {
 		weaknesses.push({

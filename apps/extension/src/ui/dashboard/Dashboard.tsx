@@ -11,11 +11,13 @@ import { Stat, StatGrid } from "@/ui/components/Stat";
 import { EmptyState } from "@/ui/components/States";
 import { formatNumber, formatPercent, relativeTime } from "@/ui/format";
 import { useCaptureData } from "@/ui/useCaptureData";
+import { CoachTab } from "./CoachTab";
 import { SettingsTab } from "./SettingsTab";
 
 const TABS = [
 	{ id: "overview", label: "overview" },
 	{ id: "keys", label: "keys" },
+	{ id: "coach", label: "coach" },
 	{ id: "tests", label: "tests" },
 	{ id: "settings", label: "settings" },
 ];
@@ -176,7 +178,7 @@ export function Dashboard(): ReactNode {
 									<Stat
 										label="avg raw"
 										value={formatNumber(stats.rawWpm.average, 1)}
-										hint={`${formatNumber(stats.wpm.best, 1)} best net`}
+										hint={`best ${formatNumber(stats.rawWpm.best, 1)}`}
 									/>
 									<Stat
 										label="consistency"
@@ -417,6 +419,16 @@ export function Dashboard(): ReactNode {
 								</Panel>
 							</>
 						)}
+					</section>
+
+					<section
+						id="mtai-panel-coach"
+						role="tabpanel"
+						aria-labelledby="mtai-tab-coach"
+						hidden={tab !== "coach"}
+						className="mtai-stack"
+					>
+						<CoachTab data={data} onOpenSettings={() => selectTab("settings")} />
 					</section>
 
 					<section

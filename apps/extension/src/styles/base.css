@@ -661,3 +661,161 @@ body.mtai-popup {
 		transition: none;
 	}
 }
+
+/* ---- dialogs ---- */
+.mtai-root dialog.mtai-dialog {
+	width: min(760px, calc(100vw - 2rem));
+	max-height: 82vh;
+	padding: 0;
+	border: 1px solid color-mix(in srgb, var(--sub-color) 35%, transparent);
+	border-radius: var(--roundness);
+	background: var(--bg-color);
+	color: var(--text-color);
+}
+
+.mtai-root dialog.mtai-dialog::backdrop {
+	background: rgb(0 0 0 / 55%);
+}
+
+.mtai-dialog__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.9rem 1rem;
+	border-bottom: 1px solid color-mix(in srgb, var(--sub-color) 25%, transparent);
+}
+
+.mtai-dialog__body {
+	padding: 1rem;
+	overflow: auto;
+	max-height: 66vh;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.mtai-dialog pre {
+	margin: 0;
+	padding: 0.75rem;
+	border-radius: var(--roundness);
+	background: var(--sub-alt-color);
+	color: var(--sub-color);
+	font-family: var(--font);
+	font-size: 0.72rem;
+	line-height: 1.55;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+/* ---- chat ---- */
+.mtai-chat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	min-height: 6rem;
+}
+
+.mtai-msg {
+	max-width: 92%;
+	padding: 0.6rem 0.8rem;
+	border-radius: var(--roundness);
+	font-size: 0.9rem;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.mtai-msg--user {
+	align-self: flex-end;
+	background: var(--sub-alt-color);
+}
+
+.mtai-msg--assistant {
+	align-self: flex-start;
+	background: none;
+	border-left: 2px solid var(--main-color);
+	border-radius: 0;
+	padding-left: 0.8rem;
+}
+
+.mtai-msg--pending {
+	color: var(--sub-color);
+}
+
+.mtai-msg__meta {
+	display: block;
+	margin-top: 0.3rem;
+	font-size: 0.68rem;
+	color: var(--sub-color);
+}
+
+.mtai-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.mtai-chips button {
+	padding: 0.3em 0.6em;
+	border: 1px solid color-mix(in srgb, var(--sub-color) 35%, transparent);
+	background: none;
+	color: var(--sub-color);
+	font-size: 0.8rem;
+}
+
+.mtai-chips button:hover {
+	background: none;
+	color: var(--text-color);
+	border-color: var(--text-color);
+}
+
+.mtai-composer {
+	display: flex;
+	align-items: flex-end;
+	gap: 0.5rem;
+}
+
+.mtai-composer textarea {
+	flex: 1;
+	min-height: 2.7rem;
+	max-height: 10rem;
+	resize: vertical;
+}
+
+.mtai-key-row {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.mtai-key-row input {
+	flex: 1;
+	min-width: 12rem;
+}
+
+.mtai-status {
+	font-size: 0.78rem;
+	line-height: 1.5;
+}
+
+.mtai-status--ok {
+	color: var(--main-color);
+}
+
+.mtai-status--error {
+	color: var(--error-color);
+}
+
+/* A class-based display rule (e.g. .mtai-stack) otherwise beats the hidden attribute. */
+.mtai-root section[hidden],
+.mtai-root [hidden] {
+	display: none;
+}
+
+.mtai-advice {
+	color: var(--text-color);
+	font-size: 0.78rem;
+	line-height: 1.55;
+}

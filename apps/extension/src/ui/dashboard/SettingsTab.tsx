@@ -5,6 +5,7 @@ import { clearTests } from "@/storage/tests-repo";
 import { Panel } from "@/ui/components/Panel";
 import { formatNumber, plural } from "@/ui/format";
 import type { CaptureData } from "@/ui/useCaptureData";
+import { ProviderSettings } from "./ProviderSettings";
 
 function downloadJson(tests: unknown[]): void {
 	const payload = {
@@ -45,6 +46,8 @@ export function SettingsTab(props: { data: CaptureData }): ReactNode {
 
 	return (
 		<div className="mtai-stack">
+			<ProviderSettings data={props.data} />
+
 			<Panel title="analysis">
 				<div className="mtai-stack">
 					<label className="mtai-field" style={{ maxWidth: "14rem" }}>
